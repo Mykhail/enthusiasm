@@ -1,0 +1,20 @@
+[
+    {
+        "type": "input",
+        "block_id": "testnet_account_block",
+        "label": {
+            "type": "plain_text",
+            "text": "Write your Testnet Near Wallet Id:"
+        },
+        "element": {
+            "type": "plain_text_input",
+            "action_id": "testnet_account_input",
+            "placeholder": {
+                "type": "plain_text",
+                "text": "accountname.testnet"
+            }
+        }
+    }
+]
+
+

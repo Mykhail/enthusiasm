@@ -1,0 +1,19 @@
+[
+    {
+        "blocks": [
+            {
+                "dispatch_action": true,
+                "type": "input",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "send_user_rewards"
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "How much Near tokens you would like to send?",
+                    "emoji": true
+                }
+            }
+        ]
+    }
+]
