@@ -1,5 +1,4 @@
 {
-  "text": "Hi buddy, how can I help you?",
   "fallback": "Upgrade your Slack client to use messages like these.",
   "color": "#3AA3E3",
   "attachment_type": "default",

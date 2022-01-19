@@ -10,7 +10,7 @@
                 },
                 "label": {
                     "type": "plain_text",
-                    "text": "How much Near tokens you would like to send?",
+                    "text": "How many Near tokens you would like to send?",
                     "emoji": true
                 }
             }
