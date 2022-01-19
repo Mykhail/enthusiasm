@@ -1,5 +1,6 @@
 [
     {
+        "dispatch_action": true,
         "type": "input",
         "block_id": "testnet_account_block",
         "label": {
@@ -16,5 +17,3 @@
         }
     }
 ]
-
-

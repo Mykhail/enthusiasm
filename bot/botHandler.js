@@ -1,4 +1,4 @@
-function respond(payload, respond) {
+function botHandler(payload, respond) {
 	switch (payload.callback_id) {
     case 'near_wallet_login':
       nearWalletLogin(payload.actions[0].value, respond);
@@ -7,8 +7,6 @@ function respond(payload, respond) {
       nearBotAbout(payload.actions[0].value, respond);
       break;
 		case 'mainnet_account_input':
-			console.log("mainnet_account_input trigger");
-
 			respond({
 				text: "Please authorize this bot in your NEAR account by following the URL - https://wallet.testnet.near.org/",
 				replace_original: true
@@ -38,7 +36,7 @@ function nearWalletLogin(selectedOption, respond) {
   }
 }
 
-function nearBotAbout(selectedOption, respond) {
+function nearBotAbout(respond) {
   const aboutBot = require('../elements/aboutbot.json');
 
   respond({
@@ -47,4 +45,4 @@ function nearBotAbout(selectedOption, respond) {
   })
 }
 
-module.exports.respond = respond
+module.exports.respond = botHandler;

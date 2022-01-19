@@ -4,16 +4,16 @@
   "attachment_type": "default",
   "actions": [
     {
+        "name": "mainnet",
+        "text": "Mainnet",
+        "type": "button",
+        "value": "main"
+    },
+    {
       "name": "testnet",
       "text": "Testnet",
       "type": "button",
       "value": "test"
-    },
-    {
-      "name": "mainnet",
-      "text": "Mainnet",
-      "type": "button",
-      "value": "main"
     }
   ]
 }

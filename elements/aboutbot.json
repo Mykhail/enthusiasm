@@ -3,7 +3,7 @@
     "type": "section",
     "text": {
         "type": "mrkdwn",
-        "text": "Hey buddy, here will be info about our beutiful bot!"
+        "text": "The first version of the Near Slack bot that was built for the Metabuild hackathon"
     }
   }
 ]
