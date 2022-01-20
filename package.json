@@ -1,5 +1,5 @@
 {
-  "name": "better_ally",
+  "name": "near_slack_bot",
   "version": "1.0.0",
   "description": "Interactive app to get information on discriminations and inequalities",
   "main": "index.js",
@@ -37,6 +37,6 @@
     "regenerator-runtime": "^0.13.9"
   },
   "engines": {
-    "node": "^13.12"
+    "node": "15.3"
   }
 }
