@@ -88,6 +88,7 @@ async function appMentionedHandler(event) {
 		await web.chat.postEphemeral({
       channel: event.channel,
 			user: event.user,
+			text: "Hi Buddy, how can I help you?",
       attachments: [botOptions]
     });
   } catch (error) {
