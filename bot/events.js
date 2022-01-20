@@ -33,6 +33,54 @@ function listenForEvents(app) {
   slackEventAdapter.on('error', (error) => {
     console.log(`error: ${error}`)
   })
+
+	app.get('/', function (req, res) {
+		res.status(404).end('N/A');
+	});
+	app.get('/getAccountId', function (req, res) {
+		var buffer = Buffer.from(JSON.stringify({
+			action: 'getAccountId',
+			slackId: req.query.slackId
+		}), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
+
+	app.get('/processAccountId/:slackId', function (req, res) {
+		let slackId = req.params.slackId;
+		let accountId = req.query.account_id;
+
+		var buffer = Buffer.from(JSON.stringify({
+			action: 'retainAccountId'
+		}), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
+
+	app.get('/sendMoney', function (req, res) {
+		let targetAccountId = req.query.targetAccountId;
+		let amount = req.query.amount;
+		let transactionHashes = req.query.transactionHashes;
+		let errorMessage = req.query.errorMessage;
+
+		if (transactionHashes) {
+			return res.end('Transaction confirmed');
+		} else if (errorMessage) {
+			return res.end(decodeURIComponent(errorMessage));
+		}
+
+		let payLoad = { action: 'sendMoney' };
+		if (targetAccountId && amount) {
+			payLoad.targetAccountId = targetAccountId;
+			payLoad.amount = amount;
+		}
+		let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
 }
 
 async function appMentionedHandler(event) {
