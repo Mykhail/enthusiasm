@@ -1,15 +1,32 @@
+use near_sdk::collections::{LookupMap};
+use near_sdk::{near_bindgen, AccountId, PanicOnDefault};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::near_bindgen;
+
 
 #[near_bindgen]
-#[derive(Default, BorshDeserialize, BorshSerialize)]
-pub struct Contract {
-    // SETUP CONTRACT STATE
+#[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
+pub struct  Contract {
+    slack_and_wallet: LookupMap<String,AccountId>,
+    master_account_id: AccountId
 }
 
 #[near_bindgen]
 impl Contract {
-    // ADD CONTRACT METHODS HERE
+    #[init]
+    pub fn new(master_account_id: AccountId) -> Self {
+        Self {
+            slack_and_wallet: LookupMap::new(b"c"),
+            master_account_id: master_account_id.into()
+        }
+    }
+
+    pub fn connect_slack_with_wallet(&mut self, slack_account_id: String, near_account_id: AccountId) {
+        self.slack_and_wallet.insert(&slack_account_id, &near_account_id);
+    }
+
+    pub fn has_wallet_associated(&self, slack_account_id: String) -> AccountId {
+        self.slack_and_wallet.get(&slack_account_id).unwrap().into()
+    }
 }
 
 /*

@@ -20,3 +20,9 @@ redirector testing:
 
     send money endpoint
         http://localhost:3000/sendMoney?targetAccountId=sub.chokobear.testnet&amount=0.3
+
+
+Smart contract deploy
+
+cd contract
+./reload_contract <AccountId> <ParentAccountId>
