@@ -1,19 +1,35 @@
-{
-  "fallback": "Upgrade your Slack client to use messages like these.",
-  "color": "#3AA3E3",
-  "attachment_type": "default",
-  "actions": [
-    {
-        "name": "mainnet",
-        "text": "Mainnet",
-        "type": "button",
-        "value": "main"
-    },
-    {
-      "name": "testnet",
-      "text": "Testnet",
-      "type": "button",
-      "value": "test"
+[
+  {
+    "type": "section",
+    "text": {
+      "type": "plain_text",
+      "text": "Please select the network:",
+      "emoji": true
     }
-  ]
-}
+  },
+  {
+    "type": "actions",
+    "elements": [
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Mainnet",
+          "emoji": true
+        },
+        "value": "main",
+        "action_id": "network-select-main"
+      },
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Testnet",
+          "emoji": true
+        },
+        "value": "test",
+        "action_id": "network-select-test"
+      }
+    ]
+  }
+]
