@@ -1,23 +1,38 @@
 {
-  "fallback": "Upgrade your Slack client to use messages like these.",
-  "color": "#3AA3E3",
-  "attachment_type": "default",
-  "callback_id": "botoptions",
-  "actions": [
+  "blocks": [
     {
-      "name": "subject_list",
-      "text": "Select one",
-      "type": "select",
-      "options": [
-        {
-          "text": "Login to the Near Wallet",
-          "value": "near_wallet_login"
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Hi buddy, how can I help you?"
+      },
+      "accessory": {
+        "type": "static_select",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select an item",
+          "emoji": true
         },
-        {
-          "text": "About",
-          "value": "near_bot_about"
-        }
-      ]
+        "options": [
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Login to the Near Wallet",
+              "emoji": true
+            },
+            "value": "login"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "About",
+              "emoji": true
+            },
+            "value": "about"
+          }
+        ],
+        "action_id": "near-bot-menu"
+      }
     }
   ]
 }
