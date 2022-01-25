@@ -1,13 +1,18 @@
-use near_sdk::collections::{LookupMap};
-use near_sdk::{near_bindgen, AccountId, PanicOnDefault};
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use std::convert::TryFrom;
 
+use near_sdk::collections::{LookupMap};
+use near_sdk::{near_bindgen, AccountId, PanicOnDefault, env, Balance, log};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::json_types::ValidAccountId;
+
+pub type TokenAccountId = AccountId;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct  Contract {
     slack_and_wallet: LookupMap<String,AccountId>,
-    master_account_id: AccountId
+    master_account_id: AccountId,
+    deposits: LookupMap<AccountId, Balance>
 }
 
 #[near_bindgen]
@@ -16,7 +21,8 @@ impl Contract {
     pub fn new(master_account_id: AccountId) -> Self {
         Self {
             slack_and_wallet: LookupMap::new(b"c"),
-            master_account_id: master_account_id.into()
+            master_account_id: master_account_id.into(),
+            deposits: LookupMap::new(b"u")
         }
     }
 
@@ -26,6 +32,31 @@ impl Contract {
 
     pub fn has_wallet_associated(&self, slack_account_id: String) -> AccountId {
         self.slack_and_wallet.get(&slack_account_id).unwrap().into()
+    }
+
+    pub fn get_balance(&self, near_account_id: AccountId) -> Balance {
+        self.deposits.get(&near_account_id).unwrap_or(0).into()
+    }
+
+    #[payable]
+    pub fn deposit(&mut self, near_account_id: Option<ValidAccountId>) {
+        let account_id_prepared: ValidAccountId = near_account_id.unwrap_or(
+            ValidAccountId::try_from(env::predecessor_account_id()).unwrap()
+        );
+        log!("Account id {} is trying to do something with attached deposit {}", account_id_prepared, env::attached_deposit());
+
+        let attached_deposit: Balance = env::attached_deposit();
+
+        self.deposit_amount_to_account(account_id_prepared.as_ref(), attached_deposit);
+    }
+
+    pub(crate) fn deposit_amount_to_account(&mut self, account_id: &AccountId, amount: Balance) {
+        self.increase_deposit(account_id.clone(), amount);
+    }
+
+    pub(crate) fn increase_deposit(&mut self, account_id: AccountId, amount: Balance) {
+        let sender_deposit: Balance = self.deposits.get(&account_id).unwrap_or(0);
+        self.deposits.insert(&account_id, &(sender_deposit + amount));
     }
 }
 
