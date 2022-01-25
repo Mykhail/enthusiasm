@@ -7,13 +7,15 @@ const { createEventAdapter } = require('@slack/events-api');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 
 const web = new WebClient(token);
-const botHandler = require('./botHandler.js');
 const botOptions = require('../elements/botoptions.json');
 const userRewards = require('../elements/userrewards.json');
 const networkSelect = require('../elements/networkselect.json');
+const botAbout = require('../elements/aboutbot.json');
+const getConfig = require('../src/config.js');
 
 const slackEventAdapter = createEventAdapter(slackSigningSecret);
 const slackBotInteractions = createMessageAdapter(slackSigningSecret);
+const nearConfig = getConfig(process.env.NEAR_ENV || 'testnet');
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -32,11 +34,12 @@ function listenForEvents(app) {
 
   slackEventAdapter.on('error', (error) => {
     console.log(`error: ${error}`)
-  })
+  });
 
 	app.get('/', function (req, res) {
 		res.status(404).end('N/A');
 	});
+
 	app.get('/getAccountId', function (req, res) {
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'getAccountId',
@@ -88,7 +91,6 @@ async function appMentionedHandler(event) {
 		await web.chat.postEphemeral({
       channel: event.channel,
 			user: event.user,
-			text: "Hi Buddy, how can I help you?",
       attachments: [botOptions]
     });
   } catch (error) {
@@ -109,47 +111,44 @@ async function reactionAddedHandler(event, userLoggedIn) {
 	}
 }
 
-slackBotInteractions.action({ type: 'select' }, (payload, respond) => {
-	const selectedOption = payload.actions[0].selected_options[0].value;
+slackBotInteractions.action({},(payload, respond) => {
+	console.log("payload.actions[0]", payload.user.id);
+	switch (payload.actions[0].action_id) {
+			case 'near-bot-menu':
+				var selectedValue = payload.actions[0].selected_option.value;
+				if(selectedValue == 'login'){
+					respond({
+						text: "Please select the network:",
+						blocks: networkSelect,
+						replace_original: true
+					})
+				} else if(selectedValue == 'about') {
+					respond({
+						text: 'Near bot about',
+						blocks: botAbout,
+						replace_original: true
+					});
+				}
 
-	if (payload.callback_id == 'botoptions') {
-		switch (selectedOption) {
-			case 'near_wallet_login':
-				let text = 'Please select a network';
-				let callbackId = 'near_wallet_login';
-				selectNetwork(text, callbackId, respond);
 				break;
-			case 'near_bot_about':
+			case 'network-select-main':
 				respond({
-					text: 'Near bot about',
-					attachments: [networkSelect],
+					blocks: [
+						{
+							"type": "section",
+							"text": {
+								"type": "mrkdwn",
+								"text": `Please authorize this bot in your NEAR account by following the URL - ${nearConfig.endpoints.apiHost}/getAccountId?slackId=${payload.user.id}`
+							}
+						}
+					]
+					,
 					replace_original: true
 				});
-				break
 		}
-	}
 
 	return { text: 'Processing...' }
 });
-
-slackBotInteractions.action({ type: 'button' }, (payload, respond) => {
-	botHandler.respond(payload, respond)
-});
-
-slackBotInteractions.action({ type: 'plain_text_input' }, (payload, respond) => {
-	payload.callback_id = "mainnet_account_input";
-	botHandler.respond(payload, respond);
-});
-
-function selectNetwork(text, callbackId, respond) {
-	networkSelect.callback_id = callbackId;
-
-	respond({
-		text: text,
-		attachments: [networkSelect],
-		replace_original: true
-	})
-}
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
