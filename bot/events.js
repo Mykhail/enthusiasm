@@ -97,7 +97,7 @@ async function appMentionedHandler(event) {
 		await web.chat.postEphemeral({
       channel: event.channel,
 			user: event.user,
-      attachments: [botOptions]
+      blocks: botOptions
     });
   } catch (error) {
     console.log(error);
@@ -161,7 +161,7 @@ slackBotInteractions.action({},(payload, respond) => {
 							"type": "section",
 							"text": {
 								"type": "mrkdwn",
-								"text": `Please authorize this bot in your NEAR account by following the URL - ${nearConfig.endpoints.apiHost}/getAccountId?slackId=${payload.user.id}`
+								"text": `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId?slackId=${payload.user.id}|the following link>`
 							}
 						}
 					]

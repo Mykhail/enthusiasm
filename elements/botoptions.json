@@ -1,38 +1,49 @@
-{
-  "blocks": [
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "Hi buddy, how can I help you?"
-      },
-      "accessory": {
-        "type": "static_select",
-        "placeholder": {
-          "type": "plain_text",
-          "text": "Select an item",
-          "emoji": true
-        },
-        "options": [
-          {
-            "text": {
-              "type": "plain_text",
-              "text": "Login to the Near Wallet",
-              "emoji": true
-            },
-            "value": "login"
-          },
-          {
-            "text": {
-              "type": "plain_text",
-              "text": "About",
-              "emoji": true
-            },
-            "value": "about"
-          }
-        ],
-        "action_id": "near-bot-menu"
-      }
+[
+  {
+    "type": "section",
+    "text": {
+      "type": "plain_text",
+      "text": "Hi buddy, how can I help you? :information_desk_person:",
+      "emoji": true
     }
-  ]
-}
+  },
+  {
+    "type": "actions",
+    "elements": [
+      {
+      "type": "static_select",
+      "placeholder": {
+        "type": "plain_text",
+        "text": "Near bot menu",
+        "emoji": true
+      },
+      "options": [
+        {
+          "text": {
+            "type": "plain_text",
+            "text": "Login to the Near Wallet :key:",
+            "emoji": true
+          },
+          "value": "login"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": "Withdraw my Near tokens :money_with_wings:",
+            "emoji": true
+          },
+          "value": "withdraw"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": "About",
+            "emoji": true
+          },
+          "value": "about"
+        }
+      ],
+      "action_id": "near-bot-menu"
+    }]
+  }
+]
