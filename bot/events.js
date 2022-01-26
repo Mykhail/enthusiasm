@@ -54,6 +54,8 @@ function listenForEvents(app) {
 		let slackId = req.params.slackId;
 		let accountId = req.query.account_id;
 
+		console.log("slackId", accountId);
+
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'retainAccountId'
 		}), 'utf-8');
@@ -98,21 +100,38 @@ async function appMentionedHandler(event) {
   }
 }
 
-async function reactionAddedHandler(event, userLoggedIn) {
+async function reactionAddedHandler(event) {
 	try {
+
+		if(isLoggedIn()){
+			userRewards[0].label.text = `How many Near tokens you would like to send to <@${event.item_user}>?`;
 			await web.chat.postEphemeral({
 				channel: event.item.channel,
 				user: event.user,
-				text: userLoggedIn ? "" : 'It seems you are not authorized yet, what you would like to do?',
-				attachments: userLoggedIn ? userRewards : [botOptions]
+				blocks: userRewards
 			});
+		} else {
+			await web.chat.postEphemeral({
+				channel: event.item.channel,
+				user: event.user,
+				blocks: [
+					{
+						"type": "section",
+						"text": {
+							"type": "mrkdwn",
+							"text": "It seems you are not authorized yet, in order to start working with the bot please call @Near Test App in the chat"
+						}
+					}
+				]
+			});
+		}
+
 	} catch (error) {
 		console.log(error);
 	}
 }
 
 slackBotInteractions.action({},(payload, respond) => {
-	console.log("payload.actions[0]", payload.user.id);
 	switch (payload.actions[0].action_id) {
 			case 'near-bot-menu':
 				var selectedValue = payload.actions[0].selected_option.value;
@@ -129,8 +148,8 @@ slackBotInteractions.action({},(payload, respond) => {
 						replace_original: true
 					});
 				}
-
 				break;
+
 			case 'network-select-main':
 				respond({
 					blocks: [
@@ -145,10 +164,18 @@ slackBotInteractions.action({},(payload, respond) => {
 					,
 					replace_original: true
 				});
-		}
+			break;
+
+		case 'send-rewards':
+			console.log("send-rewards",  payload.actions[0].value);
+	}
 
 	return { text: 'Processing...' }
 });
+
+function isLoggedIn() {
+	return userLoggedIn;
+}
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
