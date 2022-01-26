@@ -12,6 +12,7 @@ const userRewards = require('../elements/userrewards.json');
 const networkSelect = require('../elements/networkselect.json');
 const botAbout = require('../elements/aboutbot.json');
 const getConfig = require('../src/config.js');
+const nearComms = require('./nearComms');
 
 const slackEventAdapter = createEventAdapter(slackSigningSecret);
 const slackBotInteractions = createMessageAdapter(slackSigningSecret);
@@ -53,6 +54,11 @@ function listenForEvents(app) {
 	app.get('/processAccountId/:slackId', function (req, res) {
 		let slackId = req.params.slackId;
 		let accountId = req.query.account_id;
+
+		nearComms.callMethod('connect_slack_with_wallet', JSON.stringify({
+			slack_account_id: slackId,
+			near_account_id: accountId
+		}));
 
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'retainAccountId'
