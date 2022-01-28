@@ -26,3 +26,15 @@ Smart contract deploy
 
 cd contract
 ./reload_contract <AccountId> <ParentAccountId>
+
+near state contract.sbot.testnet
+
+near view contract.sbot.testnet get_wallet '{"slack_account_id": "test"}'
+
+near call contract.sbot.testnet associate_wallet_with_slack '{"slack_account_id": "test", "near_account_id": "recipient.testnet"}' --accountId sbot.testnet
+
+near call contract.sbot.testnet send_reward '{"slack_account_id": "test"}' --accountId sbot.testnet --deposit 1
+
+near view contract.sbot.testnet get_rewards '{"slack_account_id":"test"}'
+
+near call contract.sbot.testnet withdraw_rewards '{"slack_account_id": "test_recipient"}' --accountId sergey_shpota.testnet 
