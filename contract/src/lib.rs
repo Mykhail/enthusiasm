@@ -1,4 +1,3 @@
-use near_contract_standards::fungible_token::core_impl::ext_fungible_token;
 use near_sdk::collections::{LookupMap};
 use near_sdk::json_types::WrappedBalance;
 use near_sdk::{near_bindgen, AccountId, PanicOnDefault, env, Balance, BorshStorageKey, Gas, Promise, ext_contract, PromiseResult, log};
@@ -7,11 +6,8 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 pub type TokenAccountId = AccountId;
 pub type SlackAccountId = String;
 
-const GAS_FOR_AFTER_FT_TRANSFER: Gas = 25_000_000_000_000;
-const GAS_FOR_FT_TRANSFER: Gas = 25_000_000_000_000;
-const ONE_YOCTO: Balance = 1;
-const NO_DEPOSIT: Balance = 0;
-const NEAR: &str = "near";
+const CALLBACK_GAS: Gas = 25_000_000_000_000;
+const EMPTY_BALANCE: Balance = 0;
 
 #[derive(BorshStorageKey, BorshSerialize)]
 pub (crate) enum StorageKey {
@@ -21,7 +17,7 @@ pub (crate) enum StorageKey {
 
 #[ext_contract(ext_self)]
 pub trait ExtNearTips {
-    fn after_ft_transfer_balance(&mut self, slack_account_id: SlackAccountId, amount: Balance) -> bool;
+    fn on_withdraw_rewards(&mut self, recipient_account_id: AccountId, rewards: Balance) -> bool;
 }
 
 fn is_promise_success() -> bool {
@@ -63,10 +59,13 @@ impl Contract {
         self.slack_wallets.insert(&slack_account_id, &near_account_id);
     }
 
+    pub fn get_rewards(&self, slack_account_id: SlackAccountId) -> WrappedBalance {
+        self.rewards.get(&slack_account_id).unwrap_or(0).into()
+    }
+
     #[payable]
     pub fn send_reward(&mut self, slack_account_id: SlackAccountId) {
         let attached_deposit: Balance = env::attached_deposit();
-
         let recipient_rewards: Balance = self.rewards.get(&slack_account_id).unwrap_or(0);
         self.rewards.insert(&slack_account_id, &(recipient_rewards + attached_deposit));
     }
@@ -74,57 +73,40 @@ impl Contract {
     pub fn withdraw_rewards(&mut self, slack_account_id: SlackAccountId) -> Promise {
         self.assert_master_account();
 
+        let recipient_account_id: AccountId = self.slack_wallets.get(&slack_account_id).unwrap_or(AccountId::new());
+        assert_ne!(recipient_account_id, AccountId::new(), "Wrong slack account id");
+
         let rewards: Balance = self.get_rewards(slack_account_id.clone()).0;
+        assert!(rewards != EMPTY_BALANCE, "Nothing to withdraw");
 
-        let account_id: AccountId = self.slack_wallets.get(&slack_account_id).unwrap_or(AccountId::new());
-
-        env::log(format!("@{} is withdrawing {} from slack account {}",
-            account_id, rewards, slack_account_id).as_bytes());
+        env::log(format!("@{} is withdrawing rewards {} NEAR from slack account {}", recipient_account_id, rewards, slack_account_id).as_bytes());
         // zero balance
         self.rewards.insert(&slack_account_id, &0);
 
-        ext_fungible_token::ft_transfer(
-            account_id, 
-            rewards.into(), 
-            Some(format!(
-                "Withdrawing rewards from @{}",
-                env::current_account_id()
-            )), 
-            &env::predecessor_account_id(), 
-            ONE_YOCTO, 
-            GAS_FOR_FT_TRANSFER
-        ).then(ext_self::after_ft_transfer_balance(
-            slack_account_id,
-            rewards.into(),
-            &env::current_account_id(),
-            NO_DEPOSIT,
-            GAS_FOR_AFTER_FT_TRANSFER,
-        ))
+        Promise::new(recipient_account_id.clone())
+            .transfer(rewards)
+            .then(ext_self::on_withdraw_rewards(
+                recipient_account_id.clone(), 
+                rewards, 
+                &env::current_account_id(), 
+                0, 
+                CALLBACK_GAS
+            ))
     }
 
-    pub fn after_ft_transfer_balance(
-        &mut self,
-        slack_account_id: SlackAccountId,
-        amount: WrappedBalance,
-    ) -> bool {
+    pub fn on_withdraw_rewards(&mut self, recipient_account_id: AccountId, rewards: Balance) -> bool {
         assert_eq!(
             env::predecessor_account_id(),
             env::current_account_id(),
             "Callback can only be called from the contract"
         );
-        log!("Just after ft transfer log");
-        let promise_success = is_promise_success();
+
+        let withdraw_succeeded = is_promise_success();
         if !is_promise_success() {
-            log!("Near withdraw by slack account {} failed. Amount to recharge: {}", slack_account_id, amount.0);
-            self.rewards.insert(&slack_account_id, &amount.0);
+            log!("Near withdraw by slack account {} failed. Amount to recharge: {}", recipient_account_id, rewards);
+            self.rewards.insert(&recipient_account_id, &rewards);
         }
-
-        promise_success
-    }
-
-
-    pub fn get_rewards(&self, slack_account_id: SlackAccountId) -> WrappedBalance {
-        self.rewards.get(&slack_account_id).unwrap_or(0).into()
+        withdraw_succeeded
     }
 
     pub fn assert_master_account(&self) {
@@ -150,8 +132,13 @@ mod tests {
     fn setup_contract() -> (VMContextBuilder, Contract) {
         let mut context = VMContextBuilder::new();
         testing_env!(context.predecessor_account_id(accounts(0)).build());
-        let contract = Contract::new();
+        let contract = Contract::new("sergey_shpota.testnet".to_string());
         (context, contract)
     }
 
+
+    #[test]
+    fn test() {
+        let (context, mut contract) = setup_contract();
+    }
 }
