@@ -68,14 +68,24 @@ function listenForEvents(app) {
 		});
 	});
 
-	app.get('/sendMoney', function (req, res) {
+	app.get('/sendMoney', async function (req, res) {
+		let targetSlackId = req.query.targetSlackId;
 		let targetAccountId = req.query.targetAccountId;
 		let amount = req.query.amount;
 		let transactionHashes = req.query.transactionHashes;
 		let errorMessage = req.query.errorMessage;
 
 		if (transactionHashes) {
-			return res.end('Transaction confirmed');
+			const confirmedNearAmount = await nearComms.getDepositAmount(transactionHashes);
+			if (confirmedNearAmount) {
+				nearComms.callMethod('send_reward', JSON.stringify({
+					slack_account_id: targetSlackId,
+					deposit: confirmedNearAmount // tbd param to move to arguments
+				}));
+				return res.end('Transaction confirmed');
+			} else {
+				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
+			}
 		} else if (errorMessage) {
 			return res.end(decodeURIComponent(errorMessage));
 		}
@@ -172,6 +182,10 @@ slackBotInteractions.action({},(payload, respond) => {
 
 		case 'send-rewards':
 			console.log("send-rewards",  payload.actions[0].value);
+			nearComms.callMethod('withdraw_rewards', JSON.stringify({
+				slack_account_id: targetSlackId,
+				accountId: nearConfig.contractName // tbd param to move to arguments
+			}));
 	}
 
 	return { text: 'Processing...' }

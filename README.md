@@ -19,7 +19,7 @@ redirector testing:
         http://localhost:3000/getAccountId?slackId=mockedSlackId
 
     send money endpoint
-        http://localhost:3000/sendMoney?targetAccountId=sub.chokobear.testnet&amount=0.3
+        http://localhost:3000/sendMoney?targetSlackId=SLACKIDtargetAccountId=sub.chokobear.testnet&amount=0.3
 
 
 Smart contract deploy

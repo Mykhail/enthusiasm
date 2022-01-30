@@ -1,4 +1,4 @@
-const { connect, transactions, keyStores, utils } = require("near-api-js");
+const { connect, transactions, keyStores, utils, providers } = require("near-api-js");
 const getConfig = require('../src/config.js');
 const nearConfig = getConfig(process.env.NEAR_ENV || 'testnet');
 const CONTRACT_NAME = nearConfig.contractName;
@@ -9,6 +9,30 @@ const config = {
     networkId: nearConfig.networkId,
     nodeUrl: nearConfig.nodeUrl,
 };
+
+function parseDepositResult(transaction) {
+    let deposit;
+    try {
+        const rawDeposit = transaction.actions[0].Transfer.deposit;
+        const valueInNear = utils.format.formatNearAmount(rawDeposit);
+        deposit = parseFloat(valueInNear);
+    } catch (error) {
+        deposit = null;
+    }
+
+    return deposit;
+}
+
+async function getDepositAmount(hash) /* -> float | null */ {
+    if (!hash) return null;
+    const near = await connect({ ...config, keyStore });
+    const provider = near.connection.provider;
+
+    const result = await provider.txStatus(hash, CONTRACT_NAME);
+    let deposit = parseDepositResult(result.transaction);
+
+    return deposit;
+}
 
 // callMethod('set_data', JSON.stringify({data: 'Some string'}));
 // callMethod('get_data', '');
@@ -45,6 +69,7 @@ async function sendMoney(amountInNear) {
 }
 
 module.exports = {
+    getDepositAmount: getDepositAmount,
     callMethod: callMethod,
     sendMoney: sendMoney
 };
