@@ -182,16 +182,28 @@ slackBotInteractions.action({},(payload, respond) => {
 
 		case 'send-rewards':
 			console.log("send-rewards",  payload.actions[0].value);
+			//generate this link as a reactin on send money - http://localhost:3000/sendMoney?targetSlackId=SLACKIDtargetAccountId=sub.chokobear.testnet&amount=0.3
+			//SLACKIDtargetAccountId .getCofig
+			break;
+
+		case 'get-balance':
+			console.log("");
+			break;
+			//TODO: add a request to the contract
+
+		case 'withdraw-rewards':
 			nearComms.callMethod('withdraw_rewards', JSON.stringify({
 				slack_account_id: targetSlackId,
 				accountId: nearConfig.contractName // tbd param to move to arguments
 			}));
+			break;
 	}
 
 	return { text: 'Processing...' }
 });
 
 function isLoggedIn() {
+	//TODO: add a request to the contract
 	return userLoggedIn;
 }
 
