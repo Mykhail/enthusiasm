@@ -36,7 +36,7 @@ async function getDepositAmount(hash) /* -> float | null */ {
 
 // callMethod('set_data', JSON.stringify({data: 'Some string'}));
 // callMethod('get_data', '');
-async function callMethod(methodName, stringifiedParams) {
+async function callMethod(methodName, stringifiedParams = '', deposit = '0') {
     const near = await connect({ ...config, keyStore });
     const account = await near.account(CONTRACT_NAME);
     const result = await account.signAndSendTransaction({
@@ -46,7 +46,7 @@ async function callMethod(methodName, stringifiedParams) {
                 methodName,
                 Buffer.from(stringifiedParams),
                 10000000000000,
-                "0"
+                deposit
             ),
         ],
     });

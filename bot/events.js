@@ -79,9 +79,8 @@ function listenForEvents(app) {
 			const confirmedNearAmount = await nearComms.getDepositAmount(transactionHashes);
 			if (confirmedNearAmount) {
 				nearComms.callMethod('send_reward', JSON.stringify({
-					slack_account_id: targetSlackId,
-					deposit: confirmedNearAmount // tbd param to move to arguments
-				}));
+					slack_account_id: targetSlackId
+				}), confirmedNearAmount);
 				return res.end('Transaction confirmed');
 			} else {
 				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
@@ -193,8 +192,7 @@ slackBotInteractions.action({},(payload, respond) => {
 
 		case 'withdraw-rewards':
 			nearComms.callMethod('withdraw_rewards', JSON.stringify({
-				slack_account_id: targetSlackId,
-				accountId: nearConfig.contractName // tbd param to move to arguments
+				slack_account_id: targetSlackId
 			}));
 			break;
 	}
