@@ -51,7 +51,7 @@ async function callMethod(methodName, stringifiedParams = '', deposit = '0') {
         ],
     });
 
-    return Buffer.from(result.status.SuccessValue, 'base64').toString();
+    return Buffer.from(result.status.SuccessValue, 'base64').toString().replace(/^["']|["']$/gu, '');
 }
 
 async function sendMoney(amountInNear) {
