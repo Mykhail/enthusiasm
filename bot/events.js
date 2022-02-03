@@ -148,65 +148,70 @@ async function reactionAddedHandler(event) {
 }
 
 slackBotInteractions.action({}, async (payload, respond) => {
-	switch (payload.actions[0].action_id) {
-			case 'near-bot-menu':
-				var selectedValue = payload.actions[0].selected_option.value;
-				if(selectedValue == 'login'){
-					respond({
-						text: "Please select the network:",
-						blocks: networkSelect,
-						replace_original: true
-					})
-				} else if(selectedValue == 'about') {
-					respond({
-						text: 'Near bot about',
-						blocks: botAbout,
-						replace_original: true
-					});
-				} else if(selectedValue == 'balance') {
-					const balance = await nearComms.callMethod('get_rewards', JSON.stringify({
-						slack_account_id: payload.user.id
-					}));
-					respond({
-						blocks: [
-							{
-								"type": "section",
-								"text": {
-									"type": "mrkdwn",
-									"text": `Your balance is ${utils.format.formatNearAmount(String(balance))} Near`
-								}
-							}
-						]
-						,
-						replace_original: true
-					});
-				} else if(selectedValue == 'withdraw') {
-					nearComms.callMethod('withdraw_rewards', JSON.stringify({
-						slack_account_id: payload.user.id
-					}));
-				}
 
-				break;
+	let actionId = payload.actions[0].action_id === 'near-bot-menu' ? payload.actions[0].selected_option.value : payload.actions[0].action_id;
 
-			case 'network-select-main':
-				respond({
-					blocks: [
-						{
-							"type": "section",
-							"text": {
-								"type": "mrkdwn",
-								"text": `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId?slackId=${payload.user.id}|the following link>`
-							}
+	console.log("action: actionId", actionId);
+
+	switch (actionId) {
+		case 'login':
+			respond({
+				text: "Please select the network:",
+				blocks: networkSelect,
+				replace_original: true
+			});
+			break;
+
+		case 'about':
+			respond({
+				text: 'Near bot about',
+				blocks: botAbout,
+				replace_original: true
+			});
+			break;
+
+		case 'balance':
+			let balance = await nearComms.callMethod('get_rewards', JSON.stringify({
+				slack_account_id: payload.user.id
+			}));
+			respond({
+				blocks: [
+					{
+						"type": "section",
+						"text": {
+							"type": "mrkdwn",
+							"text": `Your balance is ${utils.format.formatNearAmount(String(balance))} Near`
 						}
-					]
-					,
-					replace_original: true
-				});
+					}
+				]
+				,
+				replace_original: true
+			});
+			break;
+
+		case'withdraw':
+			nearComms.callMethod('withdraw_rewards', JSON.stringify({
+				slack_account_id: payload.user.id
+			}));
+			break;
+
+		case 'network-select-main':
+			respond({
+				blocks: [
+					{
+						"type": "section",
+						"text": {
+							"type": "mrkdwn",
+							"text": `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId?slackId=${payload.user.id}|the following link>`
+						}
+					}
+				]
+				,
+				replace_original: true
+			});
 			break;
 
 		case 'send-rewards':
-
-			console.log("targetAccountId", targetAccountId);
 			respond({
 				blocks: [
 					{
@@ -220,20 +225,6 @@ slackBotInteractions.action({}, async (payload, respond) => {
 				,
 				replace_original: true
 			});
-
-			break;
-
-		case 'get-balance':
-			const balance = await nearComms.callMethod('get_rewards', JSON.stringify({
-				slack_account_id: payload.user.id
-			}));
-			console.log(balance);
-			break;
-
-		case 'withdraw-rewards':
-			nearComms.callMethod('withdraw_rewards', JSON.stringify({
-				slack_account_id: targetSlackId
-			}));
 			break;
 	}
 

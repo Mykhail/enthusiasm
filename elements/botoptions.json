@@ -12,6 +12,7 @@
     "elements": [
       {
       "type": "static_select",
+      "action_id": "near-bot-menu",
       "placeholder": {
         "type": "plain_text",
         "text": "Near bot menu",
@@ -50,8 +51,7 @@
           },
           "value": "about"
         }
-      ],
-      "action_id": "near-bot-menu"
+      ]
     }]
   }
 ]
