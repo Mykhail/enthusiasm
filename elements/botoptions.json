@@ -37,6 +37,14 @@
         {
           "text": {
             "type": "plain_text",
+            "text": "My balance",
+            "emoji": true
+          },
+          "value": "balance"
+        },
+        {
+          "text": {
+            "type": "plain_text",
             "text": "About",
             "emoji": true
           },

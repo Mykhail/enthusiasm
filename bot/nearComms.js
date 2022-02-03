@@ -13,11 +13,13 @@ const config = {
 function parseDepositResult(transaction) {
     let deposit;
     try {
-        const rawDeposit = transaction.actions[0].Transfer.deposit;
-        const valueInNear = utils.format.formatNearAmount(rawDeposit);
+			const rawDeposit = transaction.actions[0].Transfer.deposit;
+			console.log("try rawDeposit", rawDeposit);
+        const valueInNear = utils.format.formatNearAmount(String(rawDeposit));
         deposit = parseFloat(valueInNear);
     } catch (error) {
         deposit = null;
+			console.log("error transaction", error);
     }
 
     return deposit;
@@ -39,14 +41,15 @@ async function getDepositAmount(hash) /* -> float | null */ {
 async function callMethod(methodName, stringifiedParams = '', deposit = '0') {
     const near = await connect({ ...config, keyStore });
     const account = await near.account(CONTRACT_NAME);
-    const result = await account.signAndSendTransaction({
+	console.log("deposit", deposit);
+	const result = await account.signAndSendTransaction({
         receiverId: CONTRACT_NAME,
         actions: [
             transactions.functionCall(
                 methodName,
                 Buffer.from(stringifiedParams),
-                10000000000000,
-                utils.format.parseNearAmount(deposit)
+                100000000000000,
+                utils.format.parseNearAmount(String(deposit))
             ),
         ],
     });
