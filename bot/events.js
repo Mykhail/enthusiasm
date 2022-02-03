@@ -144,7 +144,7 @@ async function reactionAddedHandler(event) {
 	}
 }
 
-slackBotInteractions.action({},(payload, respond) => {
+slackBotInteractions.action({}, async (payload, respond) => {
 	switch (payload.actions[0].action_id) {
 			case 'near-bot-menu':
 				var selectedValue = payload.actions[0].selected_option.value;
@@ -186,9 +186,11 @@ slackBotInteractions.action({},(payload, respond) => {
 			break;
 
 		case 'get-balance':
-			console.log("");
+			const balance = await nearComms.callMethod('get_rewards', JSON.stringify({
+				slack_account_id: payload.user.id
+			}));
+			console.log(balance);
 			break;
-			//TODO: add a request to the contract
 
 		case 'withdraw-rewards':
 			nearComms.callMethod('withdraw_rewards', JSON.stringify({
@@ -201,8 +203,10 @@ slackBotInteractions.action({},(payload, respond) => {
 });
 
 function isLoggedIn() {
-	//TODO: add a request to the contract
-	return userLoggedIn;
+	const result = await nearComms.callMethod('get_wallet', JSON.stringify({
+		slack_account_id: payload.user.id
+	}));
+	return result.length > 0;
 }
 
 module.exports.listenForEvents = listenForEvents;
