@@ -1,5 +1,5 @@
-// const CONTRACT_NAME = process.env.CONTRACT_NAME || 'sub.chokobear.testnet';
-const CONTRACT_NAME = process.env.CONTRACT_NAME || 'chokobear.testnet';
+const CONTRACT_NAME = process.env.CONTRACT_NAME || 'sub.chokobear.testnet';
+// const CONTRACT_NAME = process.env.CONTRACT_NAME || 'chokobear.testnet';
 const path = require("path");
 const apiHost = process.env.APIHOST || 'http://localhost:3000';
 const credentialsPath = path.join(require("os").homedir(), '.near-credentials');

@@ -46,7 +46,7 @@ async function callMethod(methodName, stringifiedParams = '', deposit = '0') {
                 methodName,
                 Buffer.from(stringifiedParams),
                 10000000000000,
-                deposit
+                utils.format.parseNearAmount(deposit)
             ),
         ],
     });
