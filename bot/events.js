@@ -120,8 +120,7 @@ async function appMentionedHandler(event) {
 
 async function reactionAddedHandler(event) {
 	try {
-
-		if(isLoggedIn(event.item_user)){
+		if(await isLoggedIn(event.item_user)){
 			userRewards[0].label.text = `How many Near tokens you would like to send to <@${event.item_user}>?`;
 			targetAccountId = event.item_user;
 			await web.chat.postEphemeral({
