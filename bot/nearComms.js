@@ -41,7 +41,6 @@ async function getDepositAmount(hash) /* -> float | null */ {
 async function callMethod(methodName, stringifiedParams = '', deposit = '0') {
     const near = await connect({ ...config, keyStore });
     const account = await near.account(CONTRACT_NAME);
-	console.log("deposit", deposit);
 	const result = await account.signAndSendTransaction({
         receiverId: CONTRACT_NAME,
         actions: [
