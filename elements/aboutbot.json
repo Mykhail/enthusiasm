@@ -3,7 +3,7 @@
     "type": "section",
     "text": {
         "type": "mrkdwn",
-        "text": "The first version of the Near Slack bot that was built for the Metabuild hackathon"
+        "text": "The first version of the Enthusiasm system that was built for the Metabuild hackathon"
     }
   }
 ]

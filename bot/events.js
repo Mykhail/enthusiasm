@@ -120,7 +120,11 @@ async function appMentionedHandler(event) {
 
 async function reactionAddedHandler(event) {
 	try {
-		if(await isLoggedIn(event.item_user)){
+		console.log("event.item_use", event.user);
+
+		console.log("await isLoggedIn(event.item_user)", await isLoggedIn(event.user));
+
+		if(await isLoggedIn(event.user)){
 			userRewards[0].label.text = `How many Near tokens you would like to send to <@${event.item_user}>?`;
 			targetAccountId = event.item_user;
 			await web.chat.postEphemeral({
@@ -137,7 +141,7 @@ async function reactionAddedHandler(event) {
 						"type": "section",
 						"text": {
 							"type": "mrkdwn",
-							"text": "It seems you are not authorized yet, in order to start working with the bot please call @Near Test App in the chat"
+							"text": "It seems you are not authorized yet, to start working with Enthusiasm please call @enthusiasm in the chat"
 						}
 					}
 				]
