@@ -13,7 +13,7 @@ const botOptionsLoggedIn = require('../elements/botoptions_loggedin.json');
 const userRewards = require('../elements/userrewards.json');
 const networkSelect = require('../elements/networkselect.json');
 const botAbout = require('../elements/aboutbot.json');
-const getConfig = require('../src/config.js');
+const getConfig = require('./config.js');
 const nearComms = require('./nearComms');
 
 const slackEventAdapter = createEventAdapter(slackSigningSecret);

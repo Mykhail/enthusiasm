@@ -1,8 +1,16 @@
 const { connect, transactions, keyStores, utils, providers } = require("near-api-js");
-const getConfig = require('../src/config.js');
+const getConfig = require('./config.js');
 const nearConfig = getConfig(process.env.NEAR_ENV || 'testnet');
 const CONTRACT_NAME = nearConfig.contractName;
-const keyStore = new keyStores.UnencryptedFileSystemKeyStore(nearConfig.credentialsPath);
+let keyStore;
+if (nearConfig.privateKey) {
+    const keyPair = utils.KeyPair.fromString(nearConfig.privateKey);
+    keyStore = new keyStores.InMemoryKeyStore();
+    keyStore.setKey(nearConfig.networkId, nearConfig.contractName, keyPair);
+} else {
+    keyStore = new keyStores.UnencryptedFileSystemKeyStore(nearConfig.credentialsPath);
+}
+
 
 const config = {
     keyStore,

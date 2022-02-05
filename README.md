@@ -9,6 +9,7 @@ redirector testing:
         PORT=3000
         APIHOST=http://localhost:3000
         CONTRACT_NAME=sub.chokobear.testnet
+        PRIVATE_KEY=[your contract's private key from .near-credentials/contract.json. otherwise a file from user .near-credentials]
 
     dev runtime initialization:
         npm i

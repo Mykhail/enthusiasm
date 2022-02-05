@@ -1,8 +1,8 @@
 const CONTRACT_NAME = process.env.CONTRACT_NAME || 'sub.chokobear.testnet';
-// const CONTRACT_NAME = process.env.CONTRACT_NAME || 'chokobear.testnet';
 const path = require("path");
 const apiHost = process.env.APIHOST || 'http://localhost:3000';
 const credentialsPath = path.join(require("os").homedir(), '.near-credentials');
+const privateKey = process.env.PRIVATE_KEY;
 const ENDPOINTS = {
     apiHost: apiHost,
     signIn: apiHost,
@@ -16,6 +16,7 @@ function getConfig(env) {
             return {
                 networkId: 'mainnet',
                 nodeUrl: 'https://rpc.mainnet.near.org',
+                privateKey: privateKey,
                 contractName: CONTRACT_NAME,
                 endpoints: ENDPOINTS,
                 credentialsPath: credentialsPath,
@@ -30,6 +31,7 @@ function getConfig(env) {
             return {
                 networkId: 'testnet',
                 nodeUrl: 'https://rpc.testnet.near.org',
+                privateKey: privateKey,
                 contractName: CONTRACT_NAME,
                 endpoints: ENDPOINTS,
                 credentialsPath: credentialsPath,
