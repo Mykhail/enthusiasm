@@ -5,7 +5,8 @@ const CONTRACT_NAME = nearConfig.contractName;
 let keyStore;
 if (nearConfig.privateKey) {
     const keyPair = utils.KeyPair.fromString(nearConfig.privateKey);
-    keyStore = new keyStores.InMemoryKeyStore();
+	console.log("keyPair", keyPair);
+	keyStore = new keyStores.InMemoryKeyStore();
     keyStore.setKey(nearConfig.networkId, nearConfig.contractName, keyPair);
 } else {
     keyStore = new keyStores.UnencryptedFileSystemKeyStore(nearConfig.credentialsPath);
