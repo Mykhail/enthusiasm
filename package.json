@@ -4,7 +4,7 @@
   "description": "Enthusiasm App for the Metabuild hackathon",
   "main": "index.js",
   "scripts": {
-    "start": "parcel build src/index.html --public-url / && node index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:js": "rm -r -f ./dist/ && parcel build src/index.html --public-url /",
     "dev": "parcel watch src/index.html",
