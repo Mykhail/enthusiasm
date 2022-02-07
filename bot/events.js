@@ -71,10 +71,10 @@ function listenForEvents(app) {
 		});
 	});
 
-	app.get('/sendMoney', async function (req, res) {
-		let targetSlackId = req.query.targetSlackId;
-		let targetAccountId = req.query.targetAccountId;
-		let amount = req.query.amount;
+	app.get('/sendMoney/:targetSlackId/:targetAccountId/:amount', async function (req, res) {
+		let targetSlackId = req.params.targetSlackId;
+		let targetAccountId = req.params.targetAccountId;
+		let amount = req.params.amount;
 		let transactionHashes = req.query.transactionHashes;
 		let errorMessage = req.query.errorMessage;
 
@@ -94,6 +94,7 @@ function listenForEvents(app) {
 
 		let payLoad = { action: 'sendMoney' };
 		if (targetAccountId && amount) {
+			payLoad.targetSlackId = targetSlackId;
 			payLoad.targetAccountId = targetAccountId;
 			payLoad.amount = amount;
 		}
@@ -202,7 +203,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 
 		case 'send-rewards':
 
-			var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney?targetSlackId=${targetAccountId}&targetAccountId=${nearConfig.contractName}&amount=${payload.actions[0].value}|follow the link>`;
+			var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/${targetAccountId}/${nearConfig.contractName}/${payload.actions[0].value}|follow the link>`;
 			renderSlackBlock(respond, text);
 
 			break;

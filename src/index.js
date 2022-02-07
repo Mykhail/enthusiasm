@@ -1,5 +1,5 @@
 import 'regenerator-runtime/runtime';
-import getConfig from './config.js';
+import getConfig from '../bot/config';
 import * as nearAPI from 'near-api-js';
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
