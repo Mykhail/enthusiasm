@@ -5,7 +5,7 @@ const CONTRACT_NAME = nearConfig.contractName;
 let keyStore;
 if (nearConfig.privateKey) {
     const keyPair = utils.KeyPair.fromString(nearConfig.privateKey);
-	console.log("keyPair", keyPair);
+	console.log("nearConfig.privateKey", nearConfig.privateKey);
 	keyStore = new keyStores.InMemoryKeyStore();
     keyStore.setKey(nearConfig.networkId, nearConfig.contractName, keyPair);
 } else {
