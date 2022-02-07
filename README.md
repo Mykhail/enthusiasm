@@ -40,3 +40,7 @@ near view contract.sbot.testnet get_rewards '{"slack_account_id":"test"}'
 near call contract.sbot.testnet send_reward '{"slack_account_id": "test"}' --accountId sbot.testnet --deposit 1
 
 near call contract.sbot.testnet withdraw_rewards '{"slack_account_id": "test"}' --accountId sergey_shpota.testnet --gas=75000000000000
+
+near generate-key
+
+near add-key sergey_shpota.testnet ed25519:4n9Kv6UnMfWx5syzgBPQyUz3dFM6WCQ4yNz4JLZWFAbe --contract-id contract.sbot.testnet --allowance 30000000000
