@@ -27,4 +27,4 @@ near create-account $near_acc --masterAccount $parent_near_acc
 echo -e "${blue_color}Deploy binary${clear_color}"
 near deploy --accountId $near_acc --wasmFile res/slack_bot.wasm \
     --initFunction 'new' \
-    --initArgs '{"master_account_id": "sergey_shpota.testnet"}'
+    --initArgs '{"master_account_id": "sub.somix11.testnet"}'

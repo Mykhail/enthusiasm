@@ -22,10 +22,18 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "Login to the Near Wallet :key:",
+            "text": "Withdraw my Near tokens :money_with_wings:",
             "emoji": true
           },
-          "value": "login"
+          "value": "withdraw"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": "My balance",
+            "emoji": true
+          },
+          "value": "balance"
         },
         {
           "text": {

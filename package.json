@@ -1,7 +1,7 @@
 {
   "name": "near_slack_bot",
   "version": "1.0.0",
-  "description": "Interactive app to get information on discriminations and inequalities",
+  "description": "Enthusiasm App for the Metabuild hackathon",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sweetyclem/better_ally"
+    "url": "https://github.com/Mykhail/near-slack-bot"
   },
-  "author": "Clementine Pirlot",
-  "license": "ISC",
+  "author": "",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sweetyclem/better_ally/issues"
+    "url": "https://github.com/Mykhail/near-slack-bot"
   },
-  "homepage": "https://github.com/sweetyclem/better_ally#readme",
+  "homepage": "https://github.com/Mykhail/near-slack-bot#readme",
   "dependencies": {
     "@slack/events-api": "^2.3.3",
     "@slack/interactive-messages": "^1.6.0",

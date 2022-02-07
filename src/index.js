@@ -106,11 +106,13 @@ window.nearInitPromise = initContract().then(
                 }
                 break;
             case 'sendMoney':
+                const targetSlackId = context.targetSlackId || localStorage.getItem('targetSlackId');
                 const targetAccountId = context.targetAccountId || localStorage.getItem('targetAccountId');
                 const amount = context.amount || localStorage.getItem('amount');
-                if (!targetAccountId || !amount) {
+                if (!targetAccountId || !amount || !targetSlackId) {
                     document.getElementById('root').innerHTML = `Invalid operation`;
                 } else if (!walletConnection.getAccountId()) {
+                    localStorage.setItem('targetSlackId', targetSlackId);
                     localStorage.setItem('targetAccountId', targetAccountId);
                     localStorage.setItem('amount', amount);
                     const successEndpoint = `${nearConfig.endpoints.apiHost}/sendMoney`;
@@ -119,6 +121,7 @@ window.nearInitPromise = initContract().then(
                     signIn(signInConfig, walletConnection);
                 } else {
                     sendMoney(walletConnection, amount);
+                    localStorage.setItem('targetSlackId', '');
                     localStorage.setItem('targetAccountId', '');
                     localStorage.setItem('amount', '');
                 }
