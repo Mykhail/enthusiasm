@@ -13,12 +13,13 @@ const botOptionsLoggedIn = require('../elements/botoptions_loggedin.json');
 const userRewards = require('../elements/userrewards.json');
 const networkSelect = require('../elements/networkselect.json');
 const botAbout = require('../elements/aboutbot.json');
-const getConfig = require('./config.js');
+const config = require('./config.js');
 const nearComms = require('./nearComms');
 
 const slackEventAdapter = createEventAdapter(slackSigningSecret);
 const slackBotInteractions = createMessageAdapter(slackSigningSecret);
-const nearConfig = getConfig(process.env.NEAR_ENV || 'testnet');
+const nearConfig = config.getConfig(process.env.NEAR_ENV || 'testnet');
+const nearConfigFE = config.getFrontEndConfig(process.env.NEAR_ENV || 'testnet');
 let targetAccountId = '';
 
 function listenForEvents(app) {
@@ -44,14 +45,19 @@ function listenForEvents(app) {
 		res.status(404).end('N/A');
 	});
 
-	app.get('/getAccountId', function (req, res) {
+	app.get('/getAccountId/:slackId', function (req, res) {
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'getAccountId',
-			slackId: req.query.slackId
+			slackId: req.params.slackId,
+			nearConfig: nearConfigFE
 		}), 'utf-8');
 		res.render ('index', {locals: {
 			context: buffer.toString('base64') }
 		});
+	});
+
+	app.get('/signInFailure', function (req, res) {
+		res.end(`signInFailure`);
 	});
 
 	app.get('/processAccountId/:slackId', function (req, res) {
@@ -64,7 +70,8 @@ function listenForEvents(app) {
 		}));
 
 		var buffer = Buffer.from(JSON.stringify({
-			action: 'retainAccountId'
+			action: 'processAccountId',
+			nearConfig: nearConfigFE
 		}), 'utf-8');
 		res.render ('index', {locals: {
 			context: buffer.toString('base64') }
@@ -92,7 +99,10 @@ function listenForEvents(app) {
 			return res.end(decodeURIComponent(errorMessage));
 		}
 
-		let payLoad = { action: 'sendMoney' };
+		let payLoad = {
+			action: 'sendMoney',
+			nearConfig: nearConfigFE
+		};
 		if (targetAccountId && amount) {
 			payLoad.targetSlackId = targetSlackId;
 			payLoad.targetAccountId = targetAccountId;
@@ -196,7 +206,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			break;
 
 		case 'network-select-main':
-			var text = `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId?slackId=${payload.user.id}|the following link>`;
+			var text = `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId/${payload.user.id}|the following link>`;
 			renderSlackBlock(respond, text);
 
 			break;

@@ -1,11 +1,9 @@
 const { connect, transactions, keyStores, utils, providers } = require("near-api-js");
-const getConfig = require('./config.js');
-const nearConfig = getConfig(process.env.NEAR_ENV || 'testnet');
+const nearConfig = require('./config.js').getConfig(process.env.NEAR_ENV || 'testnet');
 const CONTRACT_NAME = nearConfig.contractName;
 let keyStore;
 if (nearConfig.privateKey) {
     const keyPair = utils.KeyPair.fromString(nearConfig.privateKey);
-	console.log("nearConfig.privateKey", nearConfig.privateKey);
 	keyStore = new keyStores.InMemoryKeyStore();
     keyStore.setKey(nearConfig.networkId, nearConfig.contractName, keyPair);
 } else {
@@ -47,7 +45,7 @@ async function getDepositAmount(hash) /* -> float */ {
 // callMethod('set_data', JSON.stringify({data: 'Some string'}));
 // callMethod('get_data', '');
 async function callMethod(methodName, stringifiedParams = '', deposit = '0') {
-	console.log(`calling method ${methodName} with deposit amount: ${deposit}`);
+	console.log(`calling method [${methodName}] with deposit amount: ${deposit}`);
     const near = await connect({ ...config, keyStore });
     const account = await near.account(CONTRACT_NAME);
     try {

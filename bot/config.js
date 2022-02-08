@@ -6,8 +6,8 @@ const privateKey = process.env.PRIVATE_KEY;
 const ENDPOINTS = {
     apiHost: apiHost,
     signIn: apiHost,
-    signInSuccess: `${apiHost}/processAccountId/[slackId]`,
-    signInFailure: `${apiHost}/signInFailure`
+    signInSuccess: `${apiHost}/processAccountId/[slackId]/`,
+    signInFailure: `${apiHost}/signInFailure/`
 };
 
 function getConfig(env) {
@@ -39,8 +39,22 @@ function getConfig(env) {
                 helperUrl: 'https://helper.testnet.near.org'
             };
         default:
-            throw Error(`Unconfigured environment '${env}'. Can be configured in src/config.js.`);
+            throw Error(`Unconfigured environment '${env}'. Can be configured in bot/config.js.`);
     }
 }
 
-module.exports = getConfig;
+function getFrontEndConfig(env) {
+    const regularConfig = getConfig(env);
+    let feConfig = {};
+    feConfig.networkId = regularConfig.networkId;
+    feConfig.nodeUrl = regularConfig.nodeUrl;
+    feConfig.contractName = regularConfig.contractName;
+    feConfig.endpoints = regularConfig.endpoints;
+    feConfig.walletUrl = regularConfig.walletUrl;
+    feConfig.helperUrl = regularConfig.helperUrl;
+
+    return feConfig;
+}
+
+module.exports.getConfig = getConfig;
+module.exports.getFrontEndConfig = getFrontEndConfig;
