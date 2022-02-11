@@ -45,3 +45,12 @@ near call contract.sbot.testnet withdraw_rewards '{"slack_account_id": "test"}' 
 near generate-key
 
 near add-key sergey_shpota.testnet ed25519:4n9Kv6UnMfWx5syzgBPQyUz3dFM6WCQ4yNz4JLZWFAbe --contract-id contract.sbot.testnet --allowance 30000000000
+
+
+near call contract.sbot.testnet create_nomination '{"owner":"test_owner", "title":"Test nomination"}' --accountId sbot.testnet --deposit 1
+
+near view contract.sbot.testnet get_nomination '{"owner":"test_owner"}'
+
+near call contract.sbot.testnet add_vote '{"owner":"test_owner", "vote":"second_user"}' --accountId sbot.testnet
+
+near call contract.sbot.testnet finish_nomination '{"owner":"test_owner"}' --accountId sergey_shpota.testnet --gas=75000000000000
