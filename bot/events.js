@@ -91,7 +91,15 @@ function listenForEvents(app) {
 				nearComms.callMethod('send_reward', JSON.stringify({
 					slack_account_id: targetSlackId
 				}), confirmedNearAmount);
-				return res.end('Transaction confirmed');
+				
+				let payLoad = {
+					action: 'showTransactionConfirmation',
+					nearConfig: nearConfigFE
+				};
+				let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
+				res.render ('index', {locals: {
+					context: buffer.toString('base64') }
+				});
 			} else {
 				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
 			}

@@ -72,7 +72,9 @@ function getSlackId() {
                 document.getElementById('root').innerHTML = 
                     `Wallet Authentication error, Please visit: <a href="${redirectLink}">Near wallet</a>`;
             } else {
-                document.getElementById('root').innerHTML = `You have successfully authenticated`;
+                const authenticatedEl = document.getElementById('authenticated');
+                authenticatedEl.classList.remove('hidden');
+                authenticatedEl.classList.add('visible');
             }
             break;
         case 'sendMoney':
@@ -95,6 +97,11 @@ function getSlackId() {
                 localStorage.setItem('targetAccountId', '');
                 localStorage.setItem('amount', '');
             }
+            break;
+        case 'showTransactionConfirmation':
+            const transactionConfirmed = document.getElementById('transactionConfirmed');
+            transactionConfirmed.classList.remove('hidden');
+            transactionConfirmed.classList.add('visible');
             break;
         default:
             document.getElementById('root').innerHTML = `Linked AccountId: ${walletConnection._connectedAccount.accountId}`;

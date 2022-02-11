@@ -17,7 +17,7 @@ redirector testing:
         npm run start
 
     wallet auth endpoint
-        http://localhost:3000/getAccountId?slackId=mockedSlackId
+        http://localhost:3000/getAccountId/SLACKID
 
     send money endpoint
         http://localhost:3000/sendMoney/SLACKID/targetNearAccountId/0.3
