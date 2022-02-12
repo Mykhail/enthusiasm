@@ -55,6 +55,36 @@ function getSlackId() {
     const { nearConfig, walletConnection } = await initContract(context.nearConfig);
 
     switch (context.action) {
+        case 'voteForSlackId':
+            if (!walletConnection.getAccountId()) {
+                signIn(nearConfig, walletConnection);
+            } else {
+                debugger;
+                const account = await walletConnection.account(walletConnection.getAccountId());
+                const methodName = context.methodName;
+                const ownerSlackId = context.ownerSlackId;
+                const votedForSlackId = context.votedForSlackId;
+                try {
+                    const result = await account.signAndSendTransaction({
+                        receiverId: nearConfig.contractName,
+                        actions: [
+                            nearAPI.transactions.functionCall(
+                                methodName,
+                                {owner: ownerSlackId, vote: votedForSlackId},
+                                100000000000000,
+                                '0'
+                            ),
+                        ],
+                    });
+
+                    const successValue = Buffer.from(result.status.SuccessValue, 'base64').toString() || '';
+                    return successValue.replace(/^["']|["']$/gu, '');
+                } catch (error) {
+                    console.log("call failed: ", error);
+                    return `error: ${error}`;
+                }
+            }
+            break;
         case 'getAccountId':
             if (!walletConnection.getAccountId()) {
                 signIn(nearConfig, walletConnection);

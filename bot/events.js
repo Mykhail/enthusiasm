@@ -45,6 +45,20 @@ function listenForEvents(app) {
 		res.status(404).end('N/A');
 	});
 
+	// voting on behalf of "team member" (wallet holder signs transaction)
+	app.get('/voteForSlackId/:ownerSlackId/:votedForSlackId', function (req, res) {
+		var buffer = Buffer.from(JSON.stringify({
+			action: 'voteForSlackId',
+			ownerSlackId: req.params.ownerSlackId,
+			votedForSlackId: req.params.votedForSlackId,
+			methodName: 'add_vote',
+			nearConfig: nearConfigFE
+		}), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
+
 	app.get('/getAccountId/:slackId', function (req, res) {
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'getAccountId',
