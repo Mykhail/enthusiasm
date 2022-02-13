@@ -78,7 +78,7 @@ function getSlackId() {
                     });
 
                     const successValue = Buffer.from(result.status.SuccessValue, 'base64').toString() || '';
-                    return successValue.replace(/^["']|["']$/gu, '');
+                    document.getElementById('root').innerHTML = successValue.replace(/^["']|["']$/gu, '');
                 } catch (error) {
                     console.log("call failed: ", error);
                     return `error: ${error}`;
