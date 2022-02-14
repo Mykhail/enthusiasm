@@ -12,6 +12,7 @@ const botOptions = require('../elements/botoptions.json');
 const botOptionsLoggedIn = require('../elements/botoptions_loggedin.json');
 const userRewards = require('../elements/userrewards.json');
 const networkSelect = require('../elements/networkselect.json');
+const nomination = require('../elements/nominations.json');
 const botAbout = require('../elements/aboutbot.json');
 const config = require('./config.js');
 const nearComms = require('./nearComms');
@@ -21,6 +22,7 @@ const slackBotInteractions = createMessageAdapter(slackSigningSecret);
 const nearConfig = config.getConfig(process.env.NEAR_ENV || 'testnet');
 const nearConfigFE = config.getFrontEndConfig(process.env.NEAR_ENV || 'testnet');
 let targetAccountId = '';
+let channelId = '';
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -91,6 +93,8 @@ function listenForEvents(app) {
 				nearComms.callMethod('send_reward', JSON.stringify({
 					slack_account_id: targetSlackId
 				}), confirmedNearAmount);
+				//TODO: Send a message to user recepint
+				//TODO: Send a message to sender
 				return res.end('Transaction confirmed');
 			} else {
 				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
@@ -165,7 +169,6 @@ async function reactionAddedHandler(event) {
 }
 
 slackBotInteractions.action({}, async (payload, respond) => {
-
 	let actionId = payload.actions[0].action_id === 'near-bot-menu' ? payload.actions[0].selected_option.value : payload.actions[0].action_id;
 
 	switch (actionId) {
@@ -174,6 +177,16 @@ slackBotInteractions.action({}, async (payload, respond) => {
 				text: "Please select the network:",
 				blocks: networkSelect,
 				replace_original: true
+			});
+			break;
+
+		case 'nomination':
+			console.log("payload 12312312", payload);
+			channelId = payload.channel.id;
+			return web.views.open({
+				token: token,
+				trigger_id: payload.trigger_id,
+				view: nomination
 			});
 			break;
 
@@ -196,9 +209,12 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			var balance = await getBalance(payload);
 
 			if (balance != 0) {
-				nearComms.callMethod('withdraw_rewards', JSON.stringify({
+				await nearComms.callMethod('withdraw_rewards', JSON.stringify({
 					slack_account_id: payload.user.id
 				}));
+
+				//TODO: console.log("sync call");
+
 			} else {
 				renderSlackBlock(respond, `Ooops, nothing to withdraw yet! :confused:`);
 			}
@@ -220,6 +236,31 @@ slackBotInteractions.action({}, async (payload, respond) => {
 	}
 
 	return { text: 'Processing...' }
+});
+
+slackBotInteractions.action({ type: 'view_submission' }, (payload, respond) => {
+	console.log("view_submission", payload, respond);
+});
+
+slackBotInteractions.viewSubmission('nomination_modal_submission', (payload, respond) => {
+	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/}|follow the link>`;
+	try {
+		web.chat.postEphemeral({
+			channel: channelId,
+			user: payload.user.id,
+			blocks: [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": text
+				}
+			}
+		]
+		});
+	} catch (error) {
+		console.log(error);
+	}
 });
 
 async function isLoggedIn(user) {
