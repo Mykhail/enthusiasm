@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:js": "rm -r -f ./dist/ && parcel build src/index.html --public-url /",
-    "dev": "parcel watch src/index.html",
+    "dev": "rm -r -f ./dist/ && parcel watch src/index.html",
     "dev:server": "parcel src/index.html"
   },
   "repository": {

@@ -55,6 +55,36 @@ function getSlackId() {
     const { nearConfig, walletConnection } = await initContract(context.nearConfig);
 
     switch (context.action) {
+        case 'voteForSlackId':
+            if (!walletConnection.getAccountId()) {
+                signIn(nearConfig, walletConnection);
+            } else {
+                debugger;
+                const account = await walletConnection.account(walletConnection.getAccountId());
+                const methodName = context.methodName;
+                const ownerSlackId = context.ownerSlackId;
+                const votedForSlackId = context.votedForSlackId;
+                try {
+                    const result = await account.signAndSendTransaction({
+                        receiverId: nearConfig.contractName,
+                        actions: [
+                            nearAPI.transactions.functionCall(
+                                methodName,
+                                {owner: ownerSlackId, vote: votedForSlackId},
+                                100000000000000,
+                                '0'
+                            ),
+                        ],
+                    });
+
+                    const successValue = Buffer.from(result.status.SuccessValue, 'base64').toString() || '';
+                    document.getElementById('root').innerHTML = successValue.replace(/^["']|["']$/gu, '');
+                } catch (error) {
+                    console.log("call failed: ", error);
+                    return `error: ${error}`;
+                }
+            }
+            break;
         case 'getAccountId':
             if (!walletConnection.getAccountId()) {
                 signIn(nearConfig, walletConnection);
@@ -72,7 +102,9 @@ function getSlackId() {
                 document.getElementById('root').innerHTML = 
                     `Wallet Authentication error, Please visit: <a href="${redirectLink}">Near wallet</a>`;
             } else {
-                document.getElementById('root').innerHTML = `You have successfully authenticated`;
+                const authenticatedEl = document.getElementById('authenticated');
+                authenticatedEl.classList.remove('hidden');
+                authenticatedEl.classList.add('visible');
             }
             break;
         case 'sendMoney':
@@ -95,6 +127,11 @@ function getSlackId() {
                 localStorage.setItem('targetAccountId', '');
                 localStorage.setItem('amount', '');
             }
+            break;
+        case 'showTransactionConfirmation':
+            const transactionConfirmed = document.getElementById('transactionConfirmed');
+            transactionConfirmed.classList.remove('hidden');
+            transactionConfirmed.classList.add('visible');
             break;
         default:
             document.getElementById('root').innerHTML = `Linked AccountId: ${walletConnection._connectedAccount.accountId}`;

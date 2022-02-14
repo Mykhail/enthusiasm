@@ -1,19 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="./favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="./favicon.ico" />
-    <title>Meta Hackaton POC</title>
-    <meta property="og:title" content="Enthusiasm">
-    <meta property="og:description" content="Meta Hackaton POC on the NEAR blockchain">
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="./favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" href="./favicon.ico" />
+        <title>Meta Hackaton POC</title>
+        <meta property="og:title" content="Enthusiasm">
+        <meta property="og:description" content="Meta Hackaton POC on the NEAR blockchain">
+        <style>
+            .centered {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+            p {
+                text-align: center;
+            }
+            .hidden {
+                display: none;
+            }
+            .visible {
+                display: block;
+            }
+            .wrapper {
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                background: radial-gradient(circle, rgba(34,193,195,1) 0%, rgba(179,253,45,1) 100%);
+                position: absolute;
+                font-size: 2em;
+            }
+        </style>
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <div class="wrapper">
+            <div lass="centered" id="root"></div>
+            <div class="centered hidden" id="authenticated">
+                <p>You are successfully authenticated</p>
+                <p>The page can be closed</p>
+            </div>
+            <div class="centered hidden" id="transactionConfirmed">
+                <p>Transaction is confirmed</p>
+                <p>The page can be closed</p>
+            </div>
+        </div>
 
-    <script src="./index.js" id="main" data-context='${context}'></script>
-  </body>
+        <script src="./index.js" id="main" data-context='${context}'></script>
+    </body>
 </html>

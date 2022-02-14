@@ -1,10 +1,13 @@
 use near_sdk::collections::{LookupMap};
 use near_sdk::json_types::WrappedBalance;
-use near_sdk::{near_bindgen, AccountId, PanicOnDefault, env, Balance, BorshStorageKey, Gas, Promise, ext_contract, PromiseResult, log};
+use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault, Balance, BorshStorageKey, Gas, Promise, ext_contract, PromiseResult, log};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{Serialize};
+
 
 pub type TokenAccountId = AccountId;
 pub type SlackAccountId = String;
+pub type Votes = u16;
 
 const CALLBACK_GAS: Gas = 25_000_000_000_000;
 const EMPTY_BALANCE: Balance = 0;
@@ -12,7 +15,23 @@ const EMPTY_BALANCE: Balance = 0;
 #[derive(BorshStorageKey, BorshSerialize)]
 pub (crate) enum StorageKey {
     Rewards,
-    SlackAccounts
+    SlackAccounts,
+    Nominations
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Debug, PartialEq)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Nominator {
+    slack_user: SlackAccountId,
+    votes: Votes
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Debug, PartialEq)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Nomination {
+    pub nominators: Vec<Nominator>,
+    pub title: String,
+    pub amount: Balance
 }
 
 #[ext_contract(ext_self)]
@@ -37,7 +56,8 @@ fn is_promise_success() -> bool {
 pub struct Contract {
     rewards: LookupMap<SlackAccountId, Balance>,
     slack_wallets: LookupMap<SlackAccountId, AccountId>,
-    master_account_id: AccountId
+    master_account_id: AccountId,
+    nominations: LookupMap<SlackAccountId, Nomination>
 }
 
 #[near_bindgen]
@@ -47,6 +67,7 @@ impl Contract {
         Self {
             rewards: LookupMap::new(StorageKey::Rewards),
             slack_wallets: LookupMap::new(StorageKey::SlackAccounts),
+            nominations: LookupMap::new(StorageKey::Nominations),
             master_account_id: master_account_id.into()
         }
     }
@@ -109,6 +130,59 @@ impl Contract {
         withdraw_succeeded
     }
 
+    #[payable]
+    pub fn create_nomination(&mut self, owner: SlackAccountId, title: String) {
+        assert_eq!(self.nominations.get(&owner), None, "Nomination alredy exists for current slack user");
+        assert!(env::attached_deposit() > 0, "Nomination amount must be greater than zero");
+        let nomination: Nomination = Nomination{
+            nominators: vec![],
+            title: title,
+            amount: env::attached_deposit()
+        };
+        self.nominations.insert(&owner, &nomination);
+    }
+
+    pub fn get_nomination(&self, owner: SlackAccountId) -> Nomination {
+        self.nominations.get(&owner).unwrap_or_else(|| env::panic("Nomination not found".as_bytes()))
+    }
+
+    pub fn add_vote(&mut self, owner: SlackAccountId, vote: SlackAccountId) {
+        let mut nomination: Nomination = self.nominations.get(&owner).unwrap_or_else(|| env::panic("Nomination not found".as_bytes()));
+        let mut found_vote = false;
+        for mut nominator in nomination.nominators.iter_mut() {
+            if nominator.slack_user == vote {
+                nominator.votes = nominator.votes + 1;
+                found_vote = true;
+                break
+            }
+        }
+        if !found_vote {
+            nomination.nominators.push(Nominator{
+                slack_user: vote,
+                votes: 1
+            })
+        }
+        self.nominations.insert(&owner, &nomination);
+    }
+
+    pub fn finish_nomination(&mut self, owner: SlackAccountId) {
+        self.assert_master_account();
+        let nomination = self.nominations.get(&owner).unwrap_or_else(|| env::panic("Nomination not found".as_bytes()));
+        let mut best_result = 0;
+        let mut winner: SlackAccountId = "".to_string();
+        for nominator in nomination.nominators.iter() {
+            if nominator.votes > best_result {
+                winner = nominator.slack_user.clone();
+                best_result = nominator.votes;
+            }
+        }
+        assert_ne!(winner, "", "No winner found");
+        env::log(format!("Winner is {} with the best result {}, assignin {} NEAR to him", winner, best_result, nomination.amount).as_bytes());
+
+        self.rewards.insert(&winner, &nomination.amount);
+        self.nominations.remove(&owner);
+    }
+
     pub fn assert_master_account(&self) {
         assert_eq!(env::predecessor_account_id(), self.master_account_id, "Access denied");
     }
@@ -126,8 +200,9 @@ impl Contract {
 mod tests {
 
     use super::*;
-    use near_sdk::test_utils::{get_logs, VMContextBuilder, accounts};
-    use near_sdk::{testing_env, AccountId, MockedBlockchain};
+    use near_sdk::test_utils::{VMContextBuilder, accounts};
+    use near_sdk::{testing_env, MockedBlockchain};
+    use std::{println as info};
 
     fn setup_contract() -> (VMContextBuilder, Contract) {
         let mut context = VMContextBuilder::new();
@@ -138,7 +213,13 @@ mod tests {
 
 
     #[test]
-    fn test() {
-        let (context, mut contract) = setup_contract();
+    fn first() {
+        let (_, mut contract) = setup_contract();
+
+        info!("Before {:?}\n", contract.get_nomination("test_nomination".to_string()));
+
+        // contract.add_vote("test_nomination".to_string(), "first_user".to_string());
+
+        // info!("After {:?}", contract.get_nomination("test_nomination".to_string()));
     }
 }

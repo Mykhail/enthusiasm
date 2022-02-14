@@ -17,10 +17,14 @@ redirector testing:
         npm run start
 
     wallet auth endpoint
-        http://localhost:3000/getAccountId?slackId=mockedSlackId
+        http://localhost:3000/getAccountId/SLACKID
 
     send money endpoint
         http://localhost:3000/sendMoney/SLACKID/targetNearAccountId/0.3
+
+
+    Vote for SLACKID endpoint
+        http://localhost:3000/voteForSlackId/OWNER_SLACKID/VOTED_FOR_SLACKID
 
 
 Smart contract deploy
@@ -41,3 +45,16 @@ near view contract.sbot.testnet get_rewards '{"slack_account_id":"test"}'
 near call contract.sbot.testnet send_reward '{"slack_account_id": "test"}' --accountId sbot.testnet --deposit 1
 
 near call contract.sbot.testnet withdraw_rewards '{"slack_account_id": "test"}' --accountId sergey_shpota.testnet --gas=75000000000000
+
+near generate-key
+
+near add-key sergey_shpota.testnet ed25519:4n9Kv6UnMfWx5syzgBPQyUz3dFM6WCQ4yNz4JLZWFAbe --contract-id contract.sbot.testnet --allowance 30000000000
+
+
+near call contract.sbot.testnet create_nomination '{"owner":"test_owner", "title":"Test nomination"}' --accountId sbot.testnet --deposit 1
+
+near view contract.sbot.testnet get_nomination '{"owner":"test_owner"}'
+
+near call contract.sbot.testnet add_vote '{"owner":"test_owner", "vote":"second_user"}' --accountId sbot.testnet
+
+near call contract.sbot.testnet finish_nomination '{"owner":"test_owner"}' --accountId sergey_shpota.testnet --gas=75000000000000

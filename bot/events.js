@@ -47,6 +47,20 @@ function listenForEvents(app) {
 		res.status(404).end('N/A');
 	});
 
+	// voting on behalf of "team member" (wallet holder signs transaction)
+	app.get('/voteForSlackId/:ownerSlackId/:votedForSlackId', function (req, res) {
+		var buffer = Buffer.from(JSON.stringify({
+			action: 'voteForSlackId',
+			ownerSlackId: req.params.ownerSlackId,
+			votedForSlackId: req.params.votedForSlackId,
+			methodName: 'add_vote',
+			nearConfig: nearConfigFE
+		}), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
+
 	app.get('/getAccountId/:slackId', function (req, res) {
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'getAccountId',
@@ -93,9 +107,15 @@ function listenForEvents(app) {
 				nearComms.callMethod('send_reward', JSON.stringify({
 					slack_account_id: targetSlackId
 				}), confirmedNearAmount);
-				//TODO: Send a message to user recepint
-				//TODO: Send a message to sender
-				return res.end('Transaction confirmed');
+				
+				let payLoad = {
+					action: 'showTransactionConfirmation',
+					nearConfig: nearConfigFE
+				};
+				let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
+				res.render ('index', {locals: {
+					context: buffer.toString('base64') }
+				});
 			} else {
 				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
 			}
