@@ -55,11 +55,40 @@ function getSlackId() {
     const { nearConfig, walletConnection } = await initContract(context.nearConfig);
 
     switch (context.action) {
+        case 'createNomination':
+            if (!walletConnection.getAccountId()) {
+                signIn(nearConfig, walletConnection);
+            } else {
+                const account = await walletConnection.account(walletConnection.getAccountId());
+                const methodName = context.methodName;
+                const ownerSlackId = context.ownerSlackId;
+                const nominationTitle = context.nominationTitle;
+                const depositAmount = context.depositAmount;
+                try {
+                    const result = await account.signAndSendTransaction({
+                        receiverId: nearConfig.contractName,
+                        actions: [
+                            nearAPI.transactions.functionCall(
+                                methodName,
+                                {owner: ownerSlackId, title: nominationTitle},
+                                100000000000000,
+                                nearAPI.utils.format.parseNearAmount(String(depositAmount))
+                            ),
+                        ],
+                    });
+
+                    const successValue = Buffer.from(result.status.SuccessValue, 'base64').toString() || '';
+                    document.getElementById('root').innerHTML = successValue.replace(/^["']|["']$/gu, '');
+                } catch (error) {
+                    console.log("call failed: ", error);
+                    document.getElementById('root').innerHTML = String(error);
+                }
+            }
+            break;
         case 'voteForSlackId':
             if (!walletConnection.getAccountId()) {
                 signIn(nearConfig, walletConnection);
             } else {
-                debugger;
                 const account = await walletConnection.account(walletConnection.getAccountId());
                 const methodName = context.methodName;
                 const ownerSlackId = context.ownerSlackId;

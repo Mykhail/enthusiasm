@@ -26,6 +26,9 @@ redirector testing:
     Vote for SLACKID endpoint
         http://localhost:3000/voteForSlackId/OWNER_SLACKID/VOTED_FOR_SLACKID
 
+    Create nomination endpoint
+        http://localhost:3000/createNomination/OWNER_SLACKID/nominationTitle/depositNearAmount
+
 
 Smart contract deploy
 
