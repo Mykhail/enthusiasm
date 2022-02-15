@@ -62,6 +62,35 @@ function listenForEvents(app) {
 		});
 	});
 
+	app.get('/createNomination/:ownerSlackId/:nominationTitle/:depositAmount', function (req, res) {
+		let transactionHashes = req.query.transactionHashes;
+		let errorMessage = req.query.errorMessage;
+		if (transactionHashes) {
+			let payLoad = {
+				action: 'showTransactionConfirmation',
+				nearConfig: nearConfigFE
+			};
+			let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
+			res.render ('index', {locals: {
+				context: buffer.toString('base64') }
+			});
+		} else if (errorMessage) {
+			return res.end(decodeURIComponent(errorMessage));
+		}
+
+		var buffer = Buffer.from(JSON.stringify({
+			action: 'createNomination',
+			ownerSlackId: req.params.ownerSlackId,
+			nominationTitle: req.params.nominationTitle,
+			depositAmount: req.params.depositAmount,
+			methodName: 'create_nomination',
+			nearConfig: nearConfigFE
+		}), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
+
 	app.get('/getAccountId/:slackId', function (req, res) {
 		var buffer = Buffer.from(JSON.stringify({
 			action: 'getAccountId',
@@ -277,9 +306,13 @@ slackBotInteractions.action({}, async (payload, respond) => {
 	return { text: 'Processing...' }
 });
 
-slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload, respond) => {
-	/*
-	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/}|follow the link>`;
+slackBotInteractions.action({ type: 'view_submission' }, (payload, respond) => {
+	console.log("view_submission", payload, respond);
+});
+
+slackBotInteractions.viewSubmission('nomination_modal_submission', (payload, respond) => {
+	// todo: substitute parameters
+	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/createNomination/[ownerSlackId]/[nominationTitle]/[depositAmount]/}|follow the link>`;
 	try {
 		web.chat.postEphemeral({
 			channel: channelId,

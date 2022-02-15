@@ -12,7 +12,8 @@ const botOptions = require('../elements/botoptions.json');
 const botOptionsLoggedIn = require('../elements/botoptions_loggedin.json');
 const userRewards = require('../elements/userrewards.json');
 const networkSelect = require('../elements/networkselect.json');
-const nomination = require('../elements/nominations.json');
+const nomination_new = require('../elements/nomination_new.json');
+const nomination_menu = require('../elements/nominations_menu.json');
 const botAbout = require('../elements/aboutbot.json');
 const config = require('./config.js');
 const nearComms = require('./nearComms');
@@ -54,6 +55,35 @@ function listenForEvents(app) {
 			ownerSlackId: req.params.ownerSlackId,
 			votedForSlackId: req.params.votedForSlackId,
 			methodName: 'add_vote',
+			nearConfig: nearConfigFE
+		}), 'utf-8');
+		res.render ('index', {locals: {
+			context: buffer.toString('base64') }
+		});
+	});
+
+	app.get('/createNomination/:ownerSlackId/:nominationTitle/:depositAmount', function (req, res) {
+		let transactionHashes = req.query.transactionHashes;
+		let errorMessage = req.query.errorMessage;
+		if (transactionHashes) {
+			let payLoad = {
+				action: 'showTransactionConfirmation',
+				nearConfig: nearConfigFE
+			};
+			let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
+			res.render ('index', {locals: {
+				context: buffer.toString('base64') }
+			});
+		} else if (errorMessage) {
+			return res.end(decodeURIComponent(errorMessage));
+		}
+
+		var buffer = Buffer.from(JSON.stringify({
+			action: 'createNomination',
+			ownerSlackId: req.params.ownerSlackId,
+			nominationTitle: req.params.nominationTitle,
+			depositAmount: req.params.depositAmount,
+			methodName: 'create_nomination',
 			nearConfig: nearConfigFE
 		}), 'utf-8');
 		res.render ('index', {locals: {
@@ -107,11 +137,6 @@ function listenForEvents(app) {
 				nearComms.callMethod('send_reward', JSON.stringify({
 					slack_account_id: targetSlackId
 				}), confirmedNearAmount);
-<<<<<<< HEAD
-				//TODO: Send a message to user recepint
-				//TODO: Send a message to sender
-				return res.end('Transaction confirmed');
-=======
 				
 				let payLoad = {
 					action: 'showTransactionConfirmation',
@@ -121,7 +146,6 @@ function listenForEvents(app) {
 				res.render ('index', {locals: {
 					context: buffer.toString('base64') }
 				});
->>>>>>> b091d362cb51781f6252165830545cfca81b74a3
 			} else {
 				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
 			}
@@ -206,14 +230,25 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			});
 			break;
 
-		case 'nomination':
-			console.log("payload 12312312", payload);
+		case 'nomination-menu':
 			channelId = payload.channel.id;
-			return web.views.open({
-				token: token,
-				trigger_id: payload.trigger_id,
-				view: nomination
+
+			respond({
+				text: '',
+				blocks: nomination_menu,
+				replace_original: true
 			});
+
+			break;
+
+		case 'nomination-new':
+
+			return web.views.open({
+			 token: token,
+			 trigger_id: payload.trigger_id,
+			 view: nomination_new
+			 });
+
 			break;
 
 		case 'about':
@@ -259,17 +294,31 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			renderSlackBlock(respond, text);
 
 			break;
+
+		case 'nomination-vote-action':
+			console.log("nomination-vote-action", payload);
+
+			var text = `In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
+			renderSlackBlock(respond, text);
+			break;
 	}
 
 	return { text: 'Processing...' }
 });
 
+<<<<<<< HEAD
+slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload, respond) => {
+	/*
+	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/}|follow the link>`;
+=======
 slackBotInteractions.action({ type: 'view_submission' }, (payload, respond) => {
 	console.log("view_submission", payload, respond);
 });
 
 slackBotInteractions.viewSubmission('nomination_modal_submission', (payload, respond) => {
-	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/}|follow the link>`;
+	// todo: substitute parameters
+	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/createNomination/[ownerSlackId]/[nominationTitle]/[depositAmount]/}|follow the link>`;
+>>>>>>> c74a9a3e26db16a3f0f3107e5f03afc7a6c27dc1
 	try {
 		web.chat.postEphemeral({
 			channel: channelId,
@@ -287,7 +336,58 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', (payload, res
 	} catch (error) {
 		console.log(error);
 	}
+
+*/
+	try {
+		var members = await web.conversations.members({
+			token: token,
+			channel: channelId
+		});
+
+		for (var member of members.members) {
+			await web.chat.postMessage({
+				channel: member,
+				user: member,
+				blocks: [
+					{
+						"type": "section",
+						"text": {
+							"type": "mrkdwn",
+							"text": `Dear <@${member}> Please vote for the nomination 'Engineer of the month'`
+						}
+					},
+					{
+						"type": "actions",
+						"elements": [
+							{
+								"type": "conversations_select",
+								"placeholder": {
+									"type": "plain_text",
+									"text": "Select a user",
+									"emoji": true
+								},
+								"action_id": "nomination-vote-action",
+								"filter": {
+									"include": [
+										"im"
+									],
+									"exclude_bot_users": true
+								}
+							}
+						]
+					}
+				]
+			});
+		}
+	}
+	catch (error) {
+		console.error(error);
+	}
+
+
 });
+
+
 
 async function isLoggedIn(user) {
 	const result = await nearComms.callMethod('get_wallet', JSON.stringify({
@@ -318,6 +418,47 @@ function renderSlackBlock(respond, text) {
 		replace_original: true
 	});
 }
+
+
+function sendVotingRequest(nomination) {
+	try {
+		web.chat.postEphemeral({
+			channel: channelId,
+			user: payload.user.id,
+			blocks: [
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": text
+					}
+				}
+			]
+		});
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+/*
+async function findConversation(name) {
+	try {
+		const result = await app.client.conversations.list({
+			token: "xoxb-your-token"
+		});
+
+		for (const channel of result.channels) {
+			if (channel.name === name) {
+				var conversationId = channel.id;
+				console.log("Found conversation ID: " + conversationId);
+				break;
+			}
+		}
+	}
+	catch (error) {
+		console.error(error);
+	}
+}*/
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
