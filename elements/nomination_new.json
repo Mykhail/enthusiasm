@@ -10,9 +10,10 @@
   "blocks": [
     {
       "type": "input",
+      "block_id": "nomination-new-name",
       "element": {
         "type": "plain_text_input",
-        "action_id": "sl_input",
+        "action_id": "nomination_new_name",
         "multiline": true,
         "placeholder": {
           "type": "plain_text",
@@ -26,9 +27,10 @@
     },
     {
       "type": "input",
+      "block_id": "nomination-new-amount",
       "element": {
         "type": "plain_text_input",
-        "action_id": "ml_input",
+        "action_id": "nomination_amount",
         "placeholder": {
           "type": "plain_text",
           "text": "Amount of Near tokens as a reward for the winner"

@@ -310,9 +310,13 @@ slackBotInteractions.action({ type: 'view_submission' }, (payload, respond) => {
 	console.log("view_submission", payload, respond);
 });
 
-slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload, respond) => {
-	// todo: substitute parameters
-	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/createNomination/[ownerSlackId]/[nominationTitle]/[depositAmount]/}|follow the link>`;
+slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload) => {
+
+	var userId = payload.user.id;
+	var nominationTitle = payload.view.state.values["nomination-new-name"].nomination_new_name.value;
+	var depositAmount = payload.view.state.values["nomination-new-amount"].nomination_amount.value;
+
+	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/createNomination/${userId}/${nominationTitle}/${depositAmount}|follow the link>`;
 	try {
 		web.chat.postEphemeral({
 			channel: channelId,
