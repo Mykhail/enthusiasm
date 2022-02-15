@@ -310,7 +310,7 @@ slackBotInteractions.action({ type: 'view_submission' }, (payload, respond) => {
 	console.log("view_submission", payload, respond);
 });
 
-slackBotInteractions.viewSubmission('nomination_modal_submission', (payload, respond) => {
+slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload, respond) => {
 	// todo: substitute parameters
 	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/createNomination/[ownerSlackId]/[nominationTitle]/[depositAmount]/}|follow the link>`;
 	try {
@@ -331,7 +331,6 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', (payload, res
 		console.log(error);
 	}
 
-*/
 	try {
 		var members = await web.conversations.members({
 			token: token,
