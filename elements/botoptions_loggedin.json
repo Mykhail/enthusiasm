@@ -38,10 +38,10 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "Announce nomination",
+            "text": "Nominations",
             "emoji": true
           },
-          "value": "nomination"
+          "value": "nomination-menu"
         },
         {
           "text": {
