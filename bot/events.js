@@ -306,31 +306,26 @@ slackBotInteractions.action({}, async (payload, respond) => {
 	return { text: 'Processing...' }
 });
 
-slackBotInteractions.action({ type: 'view_submission' }, (payload, respond) => {
-	console.log("view_submission", payload, respond);
-});
-
 slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload) => {
-
-	var userId = payload.user.id;
-	var nominationTitle = payload.view.state.values["nomination-new-name"].nomination_new_name.value;
-	var depositAmount = payload.view.state.values["nomination-new-amount"].nomination_amount.value;
-
-	var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/createNomination/${userId}/${nominationTitle}/${depositAmount}|follow the link>`;
 	try {
-		web.chat.postEphemeral({
-			channel: channelId,
-			user: payload.user.id,
-			blocks: [
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": text
-				}
-			}
-		]
-		});
+		var userId = payload.user.id;
+		var nominationTitle = payload.view.state.values["nomination-new-name"].nomination_new_name.value;
+		var depositAmount = payload.view.state.values["nomination-new-amount"].nomination_amount.value;
+		var text = `In order to confirm nomination creation please <${nearConfig.endpoints.apiHost}/createNomination/${userId}/${nominationTitle}/${depositAmount}|follow the link>`;
+
+			web.chat.postEphemeral({
+				channel: channelId,
+				user: payload.user.id,
+				blocks: [
+					{
+						"type": "section",
+						"text": {
+							"type": "mrkdwn",
+							"text": text
+						}
+					}
+				]
+			});
 	} catch (error) {
 		console.log(error);
 	}
@@ -380,11 +375,7 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 	catch (error) {
 		console.error(error);
 	}
-
-
 });
-
-
 
 async function isLoggedIn(user) {
 	const result = await nearComms.callMethod('get_wallet', JSON.stringify({
@@ -415,47 +406,6 @@ function renderSlackBlock(respond, text) {
 		replace_original: true
 	});
 }
-
-
-function sendVotingRequest(nomination) {
-	try {
-		web.chat.postEphemeral({
-			channel: channelId,
-			user: payload.user.id,
-			blocks: [
-				{
-					"type": "section",
-					"text": {
-						"type": "mrkdwn",
-						"text": text
-					}
-				}
-			]
-		});
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-/*
-async function findConversation(name) {
-	try {
-		const result = await app.client.conversations.list({
-			token: "xoxb-your-token"
-		});
-
-		for (const channel of result.channels) {
-			if (channel.name === name) {
-				var conversationId = channel.id;
-				console.log("Found conversation ID: " + conversationId);
-				break;
-			}
-		}
-	}
-	catch (error) {
-		console.error(error);
-	}
-}*/
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
