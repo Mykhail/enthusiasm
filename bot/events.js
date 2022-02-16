@@ -416,7 +416,51 @@ function renderSlackBlock(respond, text) {
 	});
 }
 
-function renderNominationItem(respond, text) {}
+function renderNominationMenu(nomination) {
+
+	var nomination = {
+		nominators: [ { slack_user: 'second_user', votes: 1 } ],
+		title: 'Test nomination',
+		amount: 1e+24
+	};
+
+	var nomination_item = {
+		"type": "section",
+		"text": {
+			"type": "mrkdwn",
+			"text": "*_The Best performer - February 2022_*"
+		},
+		"accessory": {
+			"type": "button",
+			"text": {
+				"type": "plain_text",
+				"text": "Finish",
+				"emoji": true
+			},
+			"value": "nomination-finish"
+		}
+	};
+	var divider = {
+		"type": "divider"
+	};
+
+	nomination_menu.push(nomination_item);
+
+	for(var i = 0; i < nomination.nominators.length - 1; i++) {
+		nomination_menu.push({
+			"type": "section",
+			"text": {
+			"type": "mrkdwn",
+				"text": `<@${nomination.nominators[i].slack_user}> - <${nomination.nominators[i].votes} votes`
+			}
+		});
+	}
+
+	nomination_menu.push(divider);
+
+	return nomination_menu;
+
+}
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
