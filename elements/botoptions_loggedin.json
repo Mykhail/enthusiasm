@@ -38,6 +38,14 @@
         {
           "text": {
             "type": "plain_text",
+            "text": "Nominations",
+            "emoji": true
+          },
+          "value": "nomination-menu"
+        },
+        {
+          "text": {
+            "type": "plain_text",
             "text": "About Enthusiasm",
             "emoji": true
           },

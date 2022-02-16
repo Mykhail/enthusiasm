@@ -1,0 +1,73 @@
+
+  [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Nominations:"
+      }
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "New Nomination",
+            "emoji": true
+          },
+          "style": "primary",
+          "action_id": "nomination-new"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Help",
+            "emoji": true
+          },
+          "value": "nomination_help"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "image",
+          "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
+          "alt_text": "placeholder"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Your Nominations*"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*_The Best performer - February 2022_*"
+      },
+      "accessory": {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Finish",
+          "emoji": true
+        },
+        "value": "nomination-finish"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ]

@@ -1,0 +1,47 @@
+{
+  "title": {
+    "type": "plain_text",
+    "text": "Enthusiasm Nomination"
+  },
+  "submit": {
+    "type": "plain_text",
+    "text": "Submit"
+  },
+  "blocks": [
+    {
+      "type": "input",
+      "block_id": "nomination-new-name",
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "nomination_new_name",
+        "multiline": true,
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Write an inspiring name of the nomination here"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Nomination name"
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "nomination-new-amount",
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "nomination_amount",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Amount of Near tokens as a reward for the winner"
+        }
+      },
+      "label": {
+        "type": "plain_text",
+        "text": "Amount"
+      }
+    }
+  ],
+  "type": "modal",
+  "callback_id": "nomination_modal_submission"
+}

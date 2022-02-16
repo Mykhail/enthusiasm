@@ -23,6 +23,13 @@ redirector testing:
         http://localhost:3000/sendMoney/SLACKID/targetNearAccountId/0.3
 
 
+    Vote for SLACKID endpoint
+        http://localhost:3000/voteForSlackId/OWNER_SLACKID/VOTED_FOR_SLACKID
+
+    Create nomination endpoint
+        http://localhost:3000/createNomination/OWNER_SLACKID/nominationTitle/depositNearAmount
+
+
 Smart contract deploy
 
 cd contract
