@@ -233,6 +233,8 @@ slackBotInteractions.action({}, async (payload, respond) => {
 		case 'nomination-menu':
 			channelId = payload.channel.id;
 
+			//TODO: finish nomination menu handler
+
 			respond({
 				text: '',
 				blocks: nomination_menu,
@@ -301,7 +303,14 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			var text = `In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
 			renderSlackBlock(respond, text);
 			break;
+
+		case 'nomination-finish':
+
+			//TODO: finish nomination handler
+			break;
 	}
+
+
 
 	return { text: 'Processing...' }
 });
@@ -406,6 +415,8 @@ function renderSlackBlock(respond, text) {
 		replace_original: true
 	});
 }
+
+function renderNominationItem(respond, text) {}
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
