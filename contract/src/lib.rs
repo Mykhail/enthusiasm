@@ -179,7 +179,8 @@ impl Contract {
         assert_ne!(winner, "", "No winner found");
         env::log(format!("Winner is {} with the best result {}, assignin {} NEAR to him", winner, best_result, nomination.amount).as_bytes());
 
-        self.rewards.insert(&winner, &nomination.amount);
+        let user_rewards: Balance = self.rewards.get(&winner).unwrap_or(0);
+        self.rewards.insert(&winner, &(nomination.amount + user_rewards));
         self.nominations.remove(&owner);
     }
 
