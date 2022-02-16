@@ -233,8 +233,23 @@ slackBotInteractions.action({}, async (payload, respond) => {
 		case 'nomination-menu':
 			channelId = payload.channel.id;
 
-			//TODO: finish nomination menu handler
-
+			let result;
+			let title = '';
+			let userTable = [];
+			let nominationAmount = 0;
+			try {
+				const rawResult = await nearComms.callMethod('get_nomination', JSON.stringify({owner: payload.user.id}));
+        		result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
+				title = result.title;
+				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
+				nominationAmount = utils.format.formatNearAmount(String(result.amount));
+			} catch (error) {
+				result = {error: true};
+			}
+			if (!result.error) {
+				// do something with title, userTable, nominationAmount
+			}
+			
 			respond({
 				text: '',
 				blocks: nomination_menu,
@@ -306,7 +321,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 
 		case 'nomination-finish':
 
-			//TODO: finish nomination handler
+			nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
 			break;
 	}
 
@@ -416,7 +431,51 @@ function renderSlackBlock(respond, text) {
 	});
 }
 
-function renderNominationItem(respond, text) {}
+function renderNominationMenu(nomination) {
+
+	var nomination = {
+		nominators: [ { slack_user: 'second_user', votes: 1 } ],
+		title: 'Test nomination',
+		amount: 1e+24
+	};
+
+	var nomination_item = {
+		"type": "section",
+		"text": {
+			"type": "mrkdwn",
+			"text": "*_The Best performer - February 2022_*"
+		},
+		"accessory": {
+			"type": "button",
+			"text": {
+				"type": "plain_text",
+				"text": "Finish",
+				"emoji": true
+			},
+			"value": "nomination-finish"
+		}
+	};
+	var divider = {
+		"type": "divider"
+	};
+
+	nomination_menu.push(nomination_item);
+
+	for(var i = 0; i < nomination.nominators.length - 1; i++) {
+		nomination_menu.push({
+			"type": "section",
+			"text": {
+			"type": "mrkdwn",
+				"text": `<@${nomination.nominators[i].slack_user}> - <${nomination.nominators[i].votes} votes`
+			}
+		});
+	}
+
+	nomination_menu.push(divider);
+
+	return nomination_menu;
+
+}
 
 module.exports.listenForEvents = listenForEvents;
 module.exports.appMentionedHandler = appMentionedHandler;
