@@ -233,8 +233,23 @@ slackBotInteractions.action({}, async (payload, respond) => {
 		case 'nomination-menu':
 			channelId = payload.channel.id;
 
-			//TODO: finish nomination menu handler
-
+			let result;
+			let title = '';
+			let userTable = [];
+			let nominationAmount = 0;
+			try {
+				const rawResult = await nearComms.callMethod('get_nomination', JSON.stringify({owner: payload.user.id}));
+        		result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
+				title = result.title;
+				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
+				nominationAmount = utils.format.formatNearAmount(String(result.amount));
+			} catch (error) {
+				result = {error: true};
+			}
+			if (!result.error) {
+				// do something with title, userTable, nominationAmount
+			}
+			
 			respond({
 				text: '',
 				blocks: nomination_menu,
@@ -306,7 +321,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 
 		case 'nomination-finish':
 
-			//TODO: finish nomination handler
+			nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
 			break;
 	}
 
