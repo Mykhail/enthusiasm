@@ -31,7 +31,8 @@ pub struct Nominator {
 pub struct Nomination {
     pub nominators: Vec<Nominator>,
     pub title: String,
-    pub amount: Balance
+    pub amount: Balance,
+    pub is_valid: bool
 }
 
 #[ext_contract(ext_self)]
@@ -137,13 +138,19 @@ impl Contract {
         let nomination: Nomination = Nomination{
             nominators: vec![],
             title: title,
-            amount: env::attached_deposit()
+            amount: env::attached_deposit(),
+            is_valid: true
         };
         self.nominations.insert(&owner, &nomination);
     }
 
     pub fn get_nomination(&self, owner: SlackAccountId) -> Nomination {
-        self.nominations.get(&owner).unwrap_or_else(|| env::panic("Nomination not found".as_bytes()))
+        self.nominations.get(&owner).unwrap_or(Nomination{
+            nominators: vec![],
+            title: "".to_string(),
+            amount: 0,
+            is_valid: false
+        })
     }
 
     pub fn add_vote(&mut self, owner: SlackAccountId, vote: SlackAccountId) {
@@ -177,7 +184,7 @@ impl Contract {
             }
         }
         assert_ne!(winner, "", "No winner found");
-        env::log(format!("Winner is {} with the best result {}, assignin {} NEAR to him", winner, best_result, nomination.amount).as_bytes());
+        env::log(format!("Winner is {} with the best result {}, assigned {} NEAR to him", winner, best_result, nomination.amount).as_bytes());
 
         let user_rewards: Balance = self.rewards.get(&winner).unwrap_or(0);
         self.rewards.insert(&winner, &(nomination.amount + user_rewards));
