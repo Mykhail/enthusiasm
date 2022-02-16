@@ -185,10 +185,6 @@ async function appMentionedHandler(event) {
 
 async function reactionAddedHandler(event) {
 	try {
-		console.log("event.item_use", event.user);
-
-		console.log("await isLoggedIn(event.item_user)", await isLoggedIn(event.user));
-
 		if(await isLoggedIn(event.user)){
 			userRewards[0].label.text = `How many Near tokens you would like to send to <@${event.item_user}>?`;
 			targetAccountId = event.item_user;
@@ -240,21 +236,17 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			try {
 				const rawResult = await nearComms.callMethod('get_nomination', JSON.stringify({owner: payload.user.id}));
         		result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
+
 				title = result.title;
 				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
-				nominationAmount = utils.format.formatNearAmount(String(result.amount));
 			} catch (error) {
 				result = {error: true};
 			}
 			if (!result.error) {
-				// do something with title, userTable, nominationAmount
+
+				nominationAmount = utils.format.formatNearAmount(String(result.amount));
+				await renderNominationMenu(title, userTable, nominationAmount, respond);
 			}
-			
-			respond({
-				text: '',
-				blocks: nomination_menu,
-				replace_original: true
-			});
 
 			break;
 
@@ -320,7 +312,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			break;
 
 		case 'nomination-finish':
-
+			console.log("nomination-finish");
 			nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
 			break;
 	}
@@ -431,19 +423,12 @@ function renderSlackBlock(respond, text) {
 	});
 }
 
-function renderNominationMenu(nomination) {
-
-	var nomination = {
-		nominators: [ { slack_user: 'second_user', votes: 1 } ],
-		title: 'Test nomination',
-		amount: 1e+24
-	};
-
+function renderNominationMenu(title, userTable, nominationAmount, respond) {
 	var nomination_item = {
 		"type": "section",
 		"text": {
 			"type": "mrkdwn",
-			"text": "*_The Best performer - February 2022_*"
+			"text": `*_${title} _*`
 		},
 		"accessory": {
 			"type": "button",
@@ -452,29 +437,49 @@ function renderNominationMenu(nomination) {
 				"text": "Finish",
 				"emoji": true
 			},
-			"value": "nomination-finish"
+			"action_id": "nomination-finish"
 		}
 	};
 	var divider = {
 		"type": "divider"
 	};
 
-	nomination_menu.push(nomination_item);
+	const nomination_menu_render = nomination_menu.slice();
+	nomination_menu_render.push(nomination_item);
 
-	for(var i = 0; i < nomination.nominators.length - 1; i++) {
-		nomination_menu.push({
-			"type": "section",
-			"text": {
-			"type": "mrkdwn",
-				"text": `<@${nomination.nominators[i].slack_user}> - <${nomination.nominators[i].votes} votes`
-			}
-		});
+	console.log("userTable", userTable);
+
+	if(userTable.length){
+		for(var i = 0; i < userTable.length; i++) {
+			nomination_menu_render.push({
+				"type": "section",
+					"text": {
+						"type": "plain_text",
+						"text": `<@${userTable[i].slack_user}> - ${userTable[i].votes} votes`
+					}
+				}
+			);
+		}
+	} else {
+			nomination_menu_render.push({
+				"type": "context",
+				"elements": [
+				{
+					"type": "plain_text",
+					"text": "No votes yet :yawning_face:",
+					"emoji": true
+				}]
+			});
 	}
 
-	nomination_menu.push(divider);
 
-	return nomination_menu;
+	nomination_menu_render.push(divider);
 
+	respond({
+		text: '',
+		blocks: nomination_menu_render,
+		replace_original: true
+	});
 }
 
 module.exports.listenForEvents = listenForEvents;
