@@ -22,15 +22,7 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "Withdraw my Near tokens :money_with_wings:",
-            "emoji": true
-          },
-          "value": "withdraw"
-        },
-        {
-          "text": {
-            "type": "plain_text",
-            "text": "My balance",
+            "text": ":moneybag: My balance",
             "emoji": true
           },
           "value": "balance"
@@ -38,7 +30,7 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "Nominations",
+            "text": ":trophy: Nominations",
             "emoji": true
           },
           "value": "nomination-menu"
@@ -46,7 +38,15 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "About Enthusiasm",
+            "text": ":money_with_wings: Withdraw my Near tokens",
+            "emoji": true
+          },
+          "value": "withdraw"
+        },
+        {
+          "text": {
+            "type": "plain_text",
+            "text": ":question:About Enthusiasm",
             "emoji": true
           },
           "value": "about"

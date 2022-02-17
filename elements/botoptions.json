@@ -22,7 +22,7 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "Login to the Near Wallet :key:",
+            "text": ":key:Login to the Near Wallet",
             "emoji": true
           },
           "value": "login"
@@ -30,7 +30,7 @@
         {
           "text": {
             "type": "plain_text",
-            "text": "About Enthusiasm",
+            "text": ":question:About Enthusiasm",
             "emoji": true
           },
           "value": "about"

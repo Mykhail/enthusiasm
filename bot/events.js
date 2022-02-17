@@ -288,9 +288,48 @@ slackBotInteractions.action({}, async (payload, respond) => {
 
 		case 'balance':
 			var balance = await getBalance(payload);
-			var text = `Your balance is ${utils.format.formatNearAmount(String(balance))} Near`;
+			var blocks = [
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": ":moneybag:==== *BALANCE* ====:moneybag: "
+					}
+				},
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": `Your balance is *${utils.format.formatNearAmount(String(balance))} Near*`
+					}
+				}
+			];
 
-			renderSlackBlock(respond, text);
+			if(balance != 0) {
+				blocks.push(
+					{
+						"type": "actions",
+						"elements": [
+							{
+								"type": "button",
+								"text": {
+									"type": "plain_text",
+									"text": "Withdraw",
+									"emoji": true
+								},
+								"style": "primary",
+								"action_id": "withdraw"
+							}
+						]
+					}
+				);
+			}
+
+				respond({
+					blocks: blocks,
+					replace_original: true
+				});
+			//renderSlackBlock(respond, text);
 			break;
 
 		case'withdraw':
@@ -330,7 +369,6 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			break;
 
 		case 'nomination-finish':
-			console.log("nomination-finish");
 			await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
 			break;
 	}
