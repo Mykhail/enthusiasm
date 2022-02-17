@@ -50,7 +50,22 @@ function listenForEvents(app) {
 
 	// voting on behalf of "team member" (wallet holder signs transaction)
 	app.get('/voteForSlackId/:ownerSlackId/:votedForSlackId', function (req, res) {
-		var buffer = Buffer.from(JSON.stringify({
+		let transactionHashes = req.query.transactions;
+		let errorMessage = req.query.errorMessage;
+		if (transactionHashes) {
+			let payLoad = {
+				action: 'showTransactionConfirmation',
+				nearConfig: nearConfigFE
+			};
+			let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
+			res.render ('index', {locals: {
+				context: buffer.toString('base64') }
+			});
+		} else if (errorMessage) {
+			return res.end(decodeURIComponent(errorMessage));
+		}
+
+		let buffer = Buffer.from(JSON.stringify({
 			action: 'voteForSlackId',
 			ownerSlackId: req.params.ownerSlackId,
 			votedForSlackId: req.params.votedForSlackId,
