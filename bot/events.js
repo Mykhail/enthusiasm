@@ -235,7 +235,8 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			let nominationAmount = 0;
 			try {
 				const rawResult = await nearComms.callMethod('get_nomination', JSON.stringify({owner: payload.user.id}));
-        		result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
+				console.log("rawResult", rawResult);
+				result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
 
 				title = result.title;
 				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
@@ -454,22 +455,22 @@ function renderNominationMenu(title, userTable, nominationAmount, respond) {
 			nomination_menu_render.push({
 				"type": "section",
 					"text": {
-						"type": "plain_text",
-						"text": `<@${userTable[i].slack_user}> - ${userTable[i].votes} votes`
+						"type": "mrkdwn",
+						"text": `<@${userTable[i].slack_user}> - ${userTable[i].votes} votes`//${userTable[i].votes}
 					}
 				}
 			);
 		}
 	} else {
-			nomination_menu_render.push({
-				"type": "context",
-				"elements": [
-				{
-					"type": "plain_text",
-					"text": "No votes yet :yawning_face:",
-					"emoji": true
-				}]
-			});
+		nomination_menu_render.push({
+			"type": "context",
+			"elements": [
+			{
+				"type": "plain_text",
+				"text": "No votes yet :yawning_face:",
+				"emoji": true
+			}]
+		});
 	}
 
 
