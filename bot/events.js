@@ -230,6 +230,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			channelId = payload.channel.id;
 
 			let result;
+			let isValid;
 			let title = '';
 			let userTable = [];
 			let nominationAmount = 0;
@@ -238,6 +239,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 				console.log("rawResult", rawResult);
 				result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
 
+				isValid = result.is_valid;
 				title = result.title;
 				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
 			} catch (error) {
@@ -246,7 +248,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			if (!result.error) {
 
 				nominationAmount = utils.format.formatNearAmount(String(result.amount));
-				await renderNominationMenu(title, userTable, nominationAmount, respond);
+				await renderNominationMenu(title, userTable, nominationAmount, respond, isValid);
 			}
 
 			break;
@@ -317,8 +319,6 @@ slackBotInteractions.action({}, async (payload, respond) => {
 			await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
 			break;
 	}
-
-
 
 	return { text: 'Processing...' }
 });
@@ -424,31 +424,42 @@ function renderSlackBlock(respond, text) {
 	});
 }
 
-function renderNominationMenu(title, userTable, nominationAmount, respond) {
-	var nomination_item = {
-		"type": "section",
-		"text": {
-			"type": "mrkdwn",
-			"text": `*_${title} _*`
-		},
-		"accessory": {
-			"type": "button",
+function renderNominationMenu(title, userTable, nominationAmount, respond, isValid) {
+
+		var nomination_item = {
+			"type": "section",
 			"text": {
-				"type": "plain_text",
-				"text": "Finish",
-				"emoji": true
+				"type": "mrkdwn",
+				"text": `*_${title} _*`
 			},
-			"action_id": "nomination-finish"
-		}
-	};
+			"accessory": {
+				"type": "button",
+				"text": {
+					"type": "plain_text",
+					"text": "Finish",
+					"emoji": true
+				},
+				"action_id": "nomination-finish"
+			}
+		};
+
+	var no_nominations = {
+		"type": "context",
+		"elements": [
+			{
+				"type": "plain_text",
+				"text": "No active nominations :man-shrugging:",
+				"emoji": true
+			}]
+	}
+
 	var divider = {
 		"type": "divider"
 	};
 
 	const nomination_menu_render = nomination_menu.slice();
+	nomination_item = isValid ? nomination_item : no_nominations;
 	nomination_menu_render.push(nomination_item);
-
-	console.log("userTable", userTable);
 
 	if(userTable.length){
 		for(var i = 0; i < userTable.length; i++) {
@@ -461,7 +472,7 @@ function renderNominationMenu(title, userTable, nominationAmount, respond) {
 				}
 			);
 		}
-	} else {
+	} else if (isValid) {
 		nomination_menu_render.push({
 			"type": "context",
 			"elements": [
