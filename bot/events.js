@@ -314,7 +314,7 @@ slackBotInteractions.action({}, async (payload, respond) => {
 
 		case 'nomination-finish':
 			console.log("nomination-finish");
-			nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
+			await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
 			break;
 	}
 
