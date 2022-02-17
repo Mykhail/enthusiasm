@@ -62,11 +62,12 @@ near view sub.somix11.testnet get_nomination '{"owner":"U02TH9USH6H"}'
 near call sub.somix11.testnet add_vote '{"owner":"test_owner", "vote":"second_user"}' --accountId somix11.testnet
 
 near call contract.sbot.testnet finish_nomination '{"owner":"test_owner"}' --accountId sergey_shpota.testnet --gas=75000000000000
-near call sub.somix11.testnet finish_nomination '{"owner":"U02TH9USH6H"}' --accountId somix11.testnet --gas=75000000000000
 
 
 
 
-near call sub.somix11.testnet add_vote '{"owner":"U02TH9USH6H", "vote":"D02TL98E291"}' --accountId somix11.testnet
-near call sub.somix11.testnet create_nomination '{"owner":"U02TH9USH6H", "title":"Test nomination"}' --accountId somix11.testnet --deposit 1
+
+near call sub.somix11.testnet create_nomination '{"owner":"U02TH9USH6H", "title":"The MVP player of March"}' --accountId somix11.testnet --deposit 1
 near view sub.somix11.testnet get_nomination '{"owner":"U02TH9USH6H"}'
+near call sub.somix11.testnet add_vote '{"owner":"U02TH9USH6H", "vote":"U02TH9USH6H"}' --accountId somix11.testnet
+near call sub.somix11.testnet finish_nomination '{"owner":"U02TH9USH6H"}' --accountId somix11.testnet --gas=75000000000000

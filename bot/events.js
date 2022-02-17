@@ -176,7 +176,7 @@ async function appMentionedHandler(event) {
 		await web.chat.postEphemeral({
       channel: event.channel,
 			user: event.user,
-      blocks: botMenu
+      blocks: botMenu,
     });
   } catch (error) {
     console.log(error);

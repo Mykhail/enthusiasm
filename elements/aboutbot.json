@@ -3,7 +3,7 @@
     "type": "section",
     "text": {
         "type": "mrkdwn",
-        "text": "The first version of the Enthusiasm system that was built for the Metabuild hackathon"
+        "text": "“Enthusiasm” - a Near-based corporate system for team motivation and inspiration.\n Enthusiasm provides a set of tools that help to maintain team motivation and promote the power of small actions within a team. \nRewards.]\n This functionality helps to thank any of the teammates in your Slack workspace by sending them some amount of Near tokens. \nAward nomination.\nThis functionality provides the ability to nominate any teammate for a reward at the end of a working period (sprint/month/year). Nomination represents some titles like 'The most valuable player', 'Soul of a Team' etc, and the number of the Near protocol tokens as a monetary reward. Teammates can vote for their nominees with the help of the Near blockchain, which makes this process completely easy and transparent"
     }
   }
 ]
