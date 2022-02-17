@@ -45,6 +45,13 @@ function getSlackId() {
     return context.slackId;
 }
 
+function showError(errorMsg) {
+    const el = document.getElementById('root');
+    const wrapper = document.getElementById('wrapper');
+    el.innerHTML = errorMsg;
+    wrapper.classList.add('error');
+}
+
 
 
 (async () => {
@@ -81,7 +88,7 @@ function getSlackId() {
                     document.getElementById('root').innerHTML = successValue.replace(/^["']|["']$/gu, '');
                 } catch (error) {
                     console.log("call failed: ", error);
-                    document.getElementById('root').innerHTML = String(error);
+                    showError(String(error));
                 }
             }
             break;
@@ -105,12 +112,13 @@ function getSlackId() {
                             ),
                         ],
                     });
-
-                    const successValue = Buffer.from(result.status.SuccessValue, 'base64').toString() || '';
-                    document.getElementById('root').innerHTML = successValue.replace(/^["']|["']$/gu, '');
+                    
+                    const actionConfirmedEl = document.getElementById('actionConfirmed');
+                    actionConfirmedEl.classList.remove('hidden');
+                    actionConfirmedEl.classList.add('visible');
                 } catch (error) {
                     console.log("call failed: ", error);
-                    return `error: ${error}`;
+                    showError(`Request failed, please try again later.`);
                 }
             }
             break;
@@ -141,7 +149,7 @@ function getSlackId() {
             const targetAccountId = context.targetAccountId || localStorage.getItem('targetAccountId');
             const amount = context.amount || localStorage.getItem('amount');
             if (!targetAccountId || !amount || !targetSlackId) {
-                document.getElementById('root').innerHTML = `Invalid operation`;
+                showError(`Invalid operation`);
             } else if (!walletConnection.getAccountId()) {
                 localStorage.setItem('targetSlackId', targetSlackId);
                 localStorage.setItem('targetAccountId', targetAccountId);
