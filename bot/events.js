@@ -58,7 +58,7 @@ function listenForEvents(app) {
 				nearConfig: nearConfigFE
 			};
 			let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
-			res.render ('index', {locals: {
+			return res.render ('index', {locals: {
 				context: buffer.toString('base64') }
 			});
 		} else if (errorMessage) {
@@ -77,32 +77,44 @@ function listenForEvents(app) {
 		});
 	});
 
-	app.get('/createNomination/:ownerSlackId/:nominationTitle/:depositAmount', function (req, res) {
-		let transactionHashes = req.query.transactionHashes;
-		let errorMessage = req.query.errorMessage;
+	app.get('/createNomination/:ownerSlackId/:nominationTitle/:depositAmount', async function (req, res) {
+		const transactionHashes = req.query.transactionHashes;
+		const errorMessage = req.query.errorMessage;
+		const ownerSlackId = req.params.ownerSlackId;
+		const nominationTitle = req.params.nominationTitle;
+
 		if (transactionHashes) {
-			let payLoad = {
-				action: 'showTransactionConfirmation',
-				nearConfig: nearConfigFE
-			};
-			let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
-			res.render ('index', {locals: {
-				context: buffer.toString('base64') }
-			});
+			const confirmedNearAmount = await nearComms.getDepositAmount(transactionHashes);
+			if (confirmedNearAmount) {
+				const createNominationResult = await nearComms.callMethod('create_nomination', JSON.stringify({
+					owner: ownerSlackId, title: nominationTitle
+				}), confirmedNearAmount);
+				console.log(createNominationResult);
+				
+				let payLoad = Buffer.from(JSON.stringify({
+					action: 'showTransactionConfirmation',
+					nearConfig: nearConfigFE
+				}), 'utf-8');
+				return res.render('index', {locals: {
+					context: payLoad.toString('base64') }
+				});
+			} else {
+				return res.end(`Transferred amount is not confirmed. Transaction hash: ${transactionHashes}`);
+			}
 		} else if (errorMessage) {
 			return res.end(decodeURIComponent(errorMessage));
 		}
 
-		var buffer = Buffer.from(JSON.stringify({
+		let payLoad = Buffer.from(JSON.stringify({
 			action: 'createNomination',
-			ownerSlackId: req.params.ownerSlackId,
-			nominationTitle: req.params.nominationTitle,
+			ownerSlackId: ownerSlackId,
+			nominationTitle: nominationTitle,
 			depositAmount: req.params.depositAmount,
 			methodName: 'create_nomination',
 			nearConfig: nearConfigFE
 		}), 'utf-8');
 		res.render ('index', {locals: {
-			context: buffer.toString('base64') }
+			context: payLoad.toString('base64') }
 		});
 	});
 

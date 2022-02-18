@@ -63,33 +63,13 @@ function showError(errorMsg) {
 
     switch (context.action) {
         case 'createNomination':
-            if (!walletConnection.getAccountId()) {
+            const depositAmount = context.depositAmount;
+            if (!depositAmount) {
+                showError(`Invalid operation`);
+            } else if (!walletConnection.getAccountId()) {
                 signIn(nearConfig, walletConnection);
             } else {
-                const account = await walletConnection.account(walletConnection.getAccountId());
-                const methodName = context.methodName;
-                const ownerSlackId = context.ownerSlackId;
-                const nominationTitle = context.nominationTitle;
-                const depositAmount = context.depositAmount;
-                try {
-                    const result = await account.signAndSendTransaction({
-                        receiverId: nearConfig.contractName,
-                        actions: [
-                            nearAPI.transactions.functionCall(
-                                methodName,
-                                {owner: ownerSlackId, title: nominationTitle},
-                                100000000000000,
-                                nearAPI.utils.format.parseNearAmount(String(depositAmount))
-                            ),
-                        ],
-                    });
-
-                    const successValue = Buffer.from(result.status.SuccessValue, 'base64').toString() || '';
-                    document.getElementById('root').innerHTML = successValue.replace(/^["']|["']$/gu, '');
-                } catch (error) {
-                    console.log("call failed: ", error);
-                    showError(String(error));
-                }
+                sendMoney(nearConfig.contractName, walletConnection, depositAmount);
             }
             break;
         case 'voteForSlackId':
@@ -154,10 +134,7 @@ function showError(errorMsg) {
                 localStorage.setItem('targetSlackId', targetSlackId);
                 localStorage.setItem('targetAccountId', targetAccountId);
                 localStorage.setItem('amount', amount);
-                const successEndpoint = `${nearConfig.endpoints.apiHost}/sendMoney`;
-                const signInConfig = Object.assign({}, nearConfig);
-                signInConfig.endpoints.signInSuccess = successEndpoint;
-                signIn(signInConfig, walletConnection);
+                signIn(nearConfig, walletConnection);
             } else {
                 sendMoney(nearConfig.contractName, walletConnection, amount);
                 localStorage.setItem('targetSlackId', '');
