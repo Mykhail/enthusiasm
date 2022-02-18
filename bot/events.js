@@ -170,7 +170,7 @@ function listenForEvents(app) {
 					nearConfig: nearConfigFE
 				};
 				let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
-				res.render ('index', {locals: {
+				return res.render ('index', {locals: {
 					context: buffer.toString('base64') }
 				});
 			} else {
