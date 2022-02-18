@@ -9,15 +9,21 @@
         <title>Meta Hackaton POC</title>
         <meta property="og:title" content="Enthusiasm">
         <meta property="og:description" content="Meta Hackaton POC on the NEAR blockchain">
+		<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Anonymous+Pro" />
         <style>
+			h1 { font-family: "Anonymous Pro"; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px; } h3 { font-family: "Anonymous Pro"; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: "Anonymous Pro"; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: "Anonymous Pro"; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: "Anonymous Pro"; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; }
+
             .centered {
                 position: absolute;
                 left: 50%;
                 top: 50%;
                 transform: translate(-50%, -50%);
+				text-align: center;
             }
             p {
                 text-align: center;
+				color: whitesmoke;
+				font-size: 24px;
             }
             .hidden {
                 display: none;
@@ -31,7 +37,7 @@
                 left: 0;
                 top: 0;
                 background: rgb(162,222,115);
-                background: radial-gradient(circle, rgba(162,222,115,1) 0%, rgba(255,255,255,1) 58%);
+                background: radial-gradient(circle, #7577cd 0%, #080957 100%);
                 position: absolute;
                 font-size: 2em;
             }
@@ -45,6 +51,11 @@
                 position: absolute;
                 font-size: 2em;
             }
+
+			.centered svg {
+				width: 100%;
+				height: 5em;
+			}
         </style>
     </head>
     <body>
@@ -52,14 +63,17 @@
         <div id="wrapper" class="wrapper">
             <div class="centered" id="root"></div>
             <div class="centered hidden" id="authenticated">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="#dbdbeb" x="23" y="68" width="24" height="24"><path d="M25 5C13.972656 5 5 13.972656 5 25c0 8.316406 5.105469 15.457031 12.34375 18.46875L18 41.59375C11.546875 38.855469 7 32.441406 7 25c0-9.925781 8.074219-18 18-18s18 8.074219 18 18c0 7.441406-4.546875 13.855469-11 16.59375l.65625 1.875C39.894531 40.457031 45 33.316406 45 25c0-11.027344-8.972656-20-20-20Zm0 8c-6.617187 0-12 5.382813-12 12 0 4.816406 2.867188 8.964844 6.96875 10.875l.65625-1.90625C17.308594 32.339844 15 28.9375 15 25c0-5.515625 4.484375-10 10-10s10 4.484375 10 10c0 3.9375-2.304687 7.339844-5.625 8.96875l.65625 1.90625C34.132813 33.964844 37 29.816406 37 25c0-6.617187-5.382812-12-12-12Zm0 8c-2.199219 0-4 1.800781-4 4 0 1.851563 1.28125 3.398438 3 3.84375V45h2V28.84375c1.71875-.445312 3-1.992187 3-3.84375 0-2.199219-1.800781-4-4-4Zm0 2c1.117188 0 2 .882813 2 2 0 1.117188-.882812 2-2 2-1.117187 0-2-.882812-2-2 0-1.117187.882813-2 2-2Z"></path></svg>
                 <p>You are successfully authenticated</p>
                 <p>The page can be closed</p>
             </div>
             <div class="centered hidden" id="transactionConfirmed">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="#dbdbeb" x="23" y="68" width="24" height="24"><path d="M25 5C13.972656 5 5 13.972656 5 25c0 8.316406 5.105469 15.457031 12.34375 18.46875L18 41.59375C11.546875 38.855469 7 32.441406 7 25c0-9.925781 8.074219-18 18-18s18 8.074219 18 18c0 7.441406-4.546875 13.855469-11 16.59375l.65625 1.875C39.894531 40.457031 45 33.316406 45 25c0-11.027344-8.972656-20-20-20Zm0 8c-6.617187 0-12 5.382813-12 12 0 4.816406 2.867188 8.964844 6.96875 10.875l.65625-1.90625C17.308594 32.339844 15 28.9375 15 25c0-5.515625 4.484375-10 10-10s10 4.484375 10 10c0 3.9375-2.304687 7.339844-5.625 8.96875l.65625 1.90625C34.132813 33.964844 37 29.816406 37 25c0-6.617187-5.382812-12-12-12Zm0 8c-2.199219 0-4 1.800781-4 4 0 1.851563 1.28125 3.398438 3 3.84375V45h2V28.84375c1.71875-.445312 3-1.992187 3-3.84375 0-2.199219-1.800781-4-4-4Zm0 2c1.117188 0 2 .882813 2 2 0 1.117188-.882812 2-2 2-1.117187 0-2-.882812-2-2 0-1.117187.882813-2 2-2Z"></path></svg>
                 <p>Transaction is confirmed</p>
                 <p>The page can be closed</p>
             </div>
             <div class="centered hidden" id="actionConfirmed">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="#dbdbeb" x="23" y="68" width="24" height="24"><path d="M25 5C13.972656 5 5 13.972656 5 25c0 8.316406 5.105469 15.457031 12.34375 18.46875L18 41.59375C11.546875 38.855469 7 32.441406 7 25c0-9.925781 8.074219-18 18-18s18 8.074219 18 18c0 7.441406-4.546875 13.855469-11 16.59375l.65625 1.875C39.894531 40.457031 45 33.316406 45 25c0-11.027344-8.972656-20-20-20Zm0 8c-6.617187 0-12 5.382813-12 12 0 4.816406 2.867188 8.964844 6.96875 10.875l.65625-1.90625C17.308594 32.339844 15 28.9375 15 25c0-5.515625 4.484375-10 10-10s10 4.484375 10 10c0 3.9375-2.304687 7.339844-5.625 8.96875l.65625 1.90625C34.132813 33.964844 37 29.816406 37 25c0-6.617187-5.382812-12-12-12Zm0 8c-2.199219 0-4 1.800781-4 4 0 1.851563 1.28125 3.398438 3 3.84375V45h2V28.84375c1.71875-.445312 3-1.992187 3-3.84375 0-2.199219-1.800781-4-4-4Zm0 2c1.117188 0 2 .882813 2 2 0 1.117188-.882812 2-2 2-1.117187 0-2-.882812-2-2 0-1.117187.882813-2 2-2Z"></path></svg>
                 <p>Action is confirmed</p>
                 <p>The page can be closed</p>
             </div>
