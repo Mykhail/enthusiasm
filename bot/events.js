@@ -310,6 +310,13 @@ function renderSlackBlock(respond, text) {
 	});
 }
 
+function renderBotMenu(respond) {
+	respond({
+		blocks: botOptionsLoggedIn,
+		replace_original: true
+	});
+}
+
 function renderNominationMenu(title, userTable, nominationAmount, respond, isValid) {
 
 		var nomination_item = {
@@ -395,8 +402,6 @@ async function actionsHandler(payload, respond) {
 		case 'nomination-menu':
 			channelId = payload.channel.id;
 
-			console.log("398 payload", payload);
-
 			let result;
 			let isValid;
 			let title = '';
@@ -477,6 +482,15 @@ async function actionsHandler(payload, respond) {
 								},
 								"style": "primary",
 								"action_id": "withdraw"
+							},
+							{
+								"type": "button",
+								"text": {
+									"type": "plain_text",
+									"text": "Back to menu",
+									"emoji": true
+								},
+								"action_id": "render-bot-menu"
 							}
 						]
 					}
@@ -531,6 +545,11 @@ async function actionsHandler(payload, respond) {
 			renderSlackBlock(respond, text);
 
 			//congratulateWinner();
+
+			break;
+
+		case 'render-bot-menu':
+			renderBotMenu(respond);
 
 			break;
 	}
