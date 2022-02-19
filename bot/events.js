@@ -52,7 +52,7 @@ function listenForEvents(app) {
 	// voting on behalf of "team member" (wallet holder signs transaction)
 	app.get('/voteForSlackId/:ownerSlackId/:votedForSlackId', function (req, res) {
 
-		let transactionHashes = req.query.transactions;
+		let transactionHashes = req.query.transactions || req.query.transactionHashes;
 		let errorMessage = req.query.errorMessage;
 		if (transactionHashes) {
 

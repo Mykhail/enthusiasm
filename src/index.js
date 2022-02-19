@@ -93,9 +93,12 @@ function showError(errorMsg) {
                         ],
                     });
                     
-                    const actionConfirmedEl = document.getElementById('actionConfirmed');
-                    actionConfirmedEl.classList.remove('hidden');
-                    actionConfirmedEl.classList.add('visible');
+                    const transactionHashes = result?.transaction?.hash;
+                    if (transactionHashes) {
+                        location.href = `${location.origin}${location.pathname}/?transactionHashes=${transactionHashes}`;
+                    } else {
+                        showError(`Request failed, please try again later.`);
+                    }
                 } catch (error) {
                     console.log("call failed: ", error);
                     showError(`Request failed, please try again later.`);
