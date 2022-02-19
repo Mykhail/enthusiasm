@@ -38,6 +38,7 @@ pub struct Nomination {
 #[serde(crate = "near_sdk::serde")]
 pub struct Winner {
     pub winner: SlackAccountId,
+    pub nomination: String,
     pub amount: WrappedBalance
 }
 
@@ -198,6 +199,7 @@ impl Contract {
 
         let winner = Winner{
             winner: winner,
+            nomination: nomination.title,
             amount: nomination.amount.into()
         };
         winner
