@@ -24,6 +24,7 @@ const nearConfig = config.getConfig(process.env.NEAR_ENV || 'testnet');
 const nearConfigFE = config.getFrontEndConfig(process.env.NEAR_ENV || 'testnet');
 let targetAccountId = '';
 let channelId = '';
+let nomination = {};
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -50,9 +51,13 @@ function listenForEvents(app) {
 
 	// voting on behalf of "team member" (wallet holder signs transaction)
 	app.get('/voteForSlackId/:ownerSlackId/:votedForSlackId', function (req, res) {
+
 		let transactionHashes = req.query.transactions;
 		let errorMessage = req.query.errorMessage;
 		if (transactionHashes) {
+
+			//sendVoteConfiramtion(req.params.ownerSlackId);
+
 			let payLoad = {
 				action: 'showTransactionConfirmation',
 				nearConfig: nearConfigFE
@@ -61,6 +66,7 @@ function listenForEvents(app) {
 			return res.render ('index', {locals: {
 				context: buffer.toString('base64') }
 			});
+
 		} else if (errorMessage) {
 			return res.end(decodeURIComponent(errorMessage));
 		}
@@ -86,11 +92,15 @@ function listenForEvents(app) {
 		if (transactionHashes) {
 			const confirmedNearAmount = await nearComms.getDepositAmount(transactionHashes);
 			if (confirmedNearAmount) {
-				const createNominationResult = await nearComms.callMethod('create_nomination', JSON.stringify({
-					owner: ownerSlackId, title: nominationTitle
-				}), confirmedNearAmount);
-				console.log(createNominationResult);
-				
+				try {
+					await nearComms.callMethod('create_nomination', JSON.stringify({
+						owner: ownerSlackId, title: nominationTitle
+					}), confirmedNearAmount);
+					sendVotingRequest();
+				} catch(e) {
+					console.log(e)
+				}
+
 				let payLoad = Buffer.from(JSON.stringify({
 					action: 'showTransactionConfirmation',
 					nearConfig: nearConfigFE
@@ -241,151 +251,8 @@ async function reactionAddedHandler(event) {
 	}
 }
 
-slackBotInteractions.action({}, async (payload, respond) => {
-	let actionId = payload.actions[0].action_id === 'near-bot-menu' ? payload.actions[0].selected_option.value : payload.actions[0].action_id;
-
-	switch (actionId) {
-		case 'login':
-			respond({
-				text: "Please select the network:",
-				blocks: networkSelect,
-				replace_original: true
-			});
-			break;
-
-		case 'nomination-menu':
-			channelId = payload.channel.id;
-
-			let result;
-			let isValid;
-			let title = '';
-			let userTable = [];
-			let nominationAmount = 0;
-			try {
-				const rawResult = await nearComms.callMethod('get_nomination', JSON.stringify({owner: payload.user.id}));
-				console.log("rawResult", rawResult);
-				result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
-
-				isValid = result.is_valid;
-				title = result.title;
-				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
-			} catch (error) {
-				result = {error: true};
-			}
-			if (!result.error) {
-
-				nominationAmount = utils.format.formatNearAmount(String(result.amount));
-				await renderNominationMenu(title, userTable, nominationAmount, respond, isValid);
-			}
-
-			break;
-
-		case 'nomination-new':
-
-			return web.views.open({
-			 token: token,
-			 trigger_id: payload.trigger_id,
-			 view: nomination_new
-			 });
-
-			break;
-
-		case 'about':
-			respond({
-				text: 'Near bot about',
-				blocks: botAbout,
-				replace_original: true
-			});
-			break;
-
-		case 'balance':
-			var balance = await getBalance(payload);
-			var blocks = [
-				{
-					"type": "section",
-					"text": {
-						"type": "mrkdwn",
-						"text": ":moneybag:==== *BALANCE* ====:moneybag: "
-					}
-				},
-				{
-					"type": "section",
-					"text": {
-						"type": "mrkdwn",
-						"text": `Your balance is *${utils.format.formatNearAmount(String(balance))} Near*`
-					}
-				}
-			];
-
-			if(balance != 0) {
-				blocks.push(
-					{
-						"type": "actions",
-						"elements": [
-							{
-								"type": "button",
-								"text": {
-									"type": "plain_text",
-									"text": "Withdraw",
-									"emoji": true
-								},
-								"style": "primary",
-								"action_id": "withdraw"
-							}
-						]
-					}
-				);
-			}
-
-				respond({
-					blocks: blocks,
-					replace_original: true
-				});
-			//renderSlackBlock(respond, text);
-			break;
-
-		case'withdraw':
-			var balance = await getBalance(payload);
-
-			if (balance != 0) {
-				await nearComms.callMethod('withdraw_rewards', JSON.stringify({
-					slack_account_id: payload.user.id
-				}));
-
-				//TODO: console.log("sync call");
-
-			} else {
-				renderSlackBlock(respond, `Ooops, nothing to withdraw yet! :confused:`);
-			}
-
-			break;
-
-		case 'network-select-main':
-			var text = `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId/${payload.user.id}|the following link>`;
-			renderSlackBlock(respond, text);
-
-			break;
-
-		case 'send-rewards':
-
-			var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/${targetAccountId}/${nearConfig.contractName}/${payload.actions[0].value}|follow the link>`;
-			renderSlackBlock(respond, text);
-
-			break;
-
-		case 'nomination-vote-action':
-			console.log("nomination-vote-action", payload);
-
-			var text = `In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
-			renderSlackBlock(respond, text);
-			break;
-
-		case 'nomination-finish':
-			await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
-			break;
-	}
-
-	return { text: 'Processing...' }
+slackBotInteractions.action({}, (payload, respond) => {
+	actionsHandler(payload, respond);
 });
 
 slackBotInteractions.viewSubmission('nomination_modal_submission', async (payload) => {
@@ -410,52 +277,6 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 			});
 	} catch (error) {
 		console.log(error);
-	}
-
-	try {
-		var members = await web.conversations.members({
-			token: token,
-			channel: channelId
-		});
-
-		for (var member of members.members) {
-			await web.chat.postMessage({
-				channel: member,
-				user: member,
-				blocks: [
-					{
-						"type": "section",
-						"text": {
-							"type": "mrkdwn",
-							"text": `Dear <@${member}> Please vote for the nomination 'Engineer of the month'`
-						}
-					},
-					{
-						"type": "actions",
-						"elements": [
-							{
-								"type": "conversations_select",
-								"placeholder": {
-									"type": "plain_text",
-									"text": "Select a user",
-									"emoji": true
-								},
-								"action_id": "nomination-vote-action",
-								"filter": {
-									"include": [
-										"im"
-									],
-									"exclude_bot_users": true
-								}
-							}
-						]
-					}
-				]
-			});
-		}
-	}
-	catch (error) {
-		console.error(error);
 	}
 });
 
@@ -556,6 +377,250 @@ function renderNominationMenu(title, userTable, nominationAmount, respond, isVal
 		text: '',
 		blocks: nomination_menu_render,
 		replace_original: true
+	});
+}
+
+async function actionsHandler(payload, respond) {
+	let actionId = payload.actions[0].action_id === 'near-bot-menu' ? payload.actions[0].selected_option.value : payload.actions[0].action_id;
+
+	switch (actionId) {
+		case 'login':
+			respond({
+				text: "Please select the network:",
+				blocks: networkSelect,
+				replace_original: true
+			});
+			break;
+
+		case 'nomination-menu':
+			channelId = payload.channel.id;
+
+			console.log("398 payload", payload);
+
+			let result;
+			let isValid;
+			let title = '';
+			let userTable = [];
+			let nominationAmount = 0;
+			try {
+				const rawResult = await nearComms.callMethod('get_nomination', JSON.stringify({owner: payload.user.id}));
+				console.log("rawResult", rawResult);
+				result = JSON.parse(rawResult.replace(/(.*?amount.\:)(\d+)(.*)/, '$1"$2"$3'));
+
+				isValid = result.is_valid;
+				title = result.title;
+				userTable = (result.nominators || []).sort((a, b) => a.votes - b.votes);
+			} catch (error) {
+				result = {error: true};
+			}
+			if (!result.error) {
+				nominationAmount = utils.format.formatNearAmount(String(result.amount));
+				await renderNominationMenu(title, userTable, nominationAmount, respond, isValid);
+
+				//TODO: just to have nomination information for the finish block. to fix.
+				nomination = {
+					title: title
+
+				};
+			}
+
+			break;
+
+		case 'nomination-new':
+
+			return web.views.open({
+				token: token,
+				trigger_id: payload.trigger_id,
+				view: nomination_new
+			});
+
+			break;
+
+		case 'about':
+			respond({
+				text: 'Near bot about',
+				blocks: botAbout,
+				replace_original: true
+			});
+			break;
+
+		case 'balance':
+			var balance = await getBalance(payload);
+			var blocks = [
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": ":moneybag:==== *BALANCE* ====:moneybag: "
+					}
+				},
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": `Your balance is *${utils.format.formatNearAmount(String(balance))} Near*`
+					}
+				}
+			];
+
+			if(balance != 0) {
+				blocks.push(
+					{
+						"type": "actions",
+						"elements": [
+							{
+								"type": "button",
+								"text": {
+									"type": "plain_text",
+									"text": "Withdraw",
+									"emoji": true
+								},
+								"style": "primary",
+								"action_id": "withdraw"
+							}
+						]
+					}
+				);
+			}
+
+			respond({
+				blocks: blocks,
+				replace_original: true
+			});
+			//renderSlackBlock(respond, text);
+			break;
+
+		case'withdraw':
+			var balance = await getBalance(payload);
+
+			if (balance != 0) {
+				await nearComms.callMethod('withdraw_rewards', JSON.stringify({
+					slack_account_id: payload.user.id
+				}));
+
+				//TODO: console.log("sync call");
+
+			} else {
+				renderSlackBlock(respond, `Ooops, nothing to withdraw yet! :confused:`);
+			}
+
+			break;
+
+		case 'network-select-main':
+			var text = `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId/${payload.user.id}|the following link>`;
+			renderSlackBlock(respond, text);
+
+			break;
+
+		case 'send-rewards':
+
+			var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/${targetAccountId}/${nearConfig.contractName}/${payload.actions[0].value}|follow the link>`;
+			renderSlackBlock(respond, text);
+
+			break;
+
+		case 'nomination-vote-action':
+
+			var text = `In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
+			renderSlackBlock(respond, text);
+			break;
+
+		case 'nomination-finish':
+			await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
+			var text = `You have taken one more step to *bring more enthusiasm* to your team! Nomination has been succesfully fininshed! :tada: `;
+			renderSlackBlock(respond, text);
+
+			//congratulateWinner();
+
+			break;
+	}
+
+	return { text: 'Processing...' }
+}
+
+async function sendVotingRequest() {
+	try {
+		var members = await web.conversations.members({
+			token: token,
+			channel: channelId
+		});
+
+		console.log("members", members);
+
+		for (var member of members.members) {
+			await web.chat.postMessage({
+				channel: member,
+				user: member,
+				blocks: [
+					{
+						"type": "section",
+						"text": {
+							"type": "mrkdwn",
+							"text": `Dear <@${member}> Please vote for the nomination 'Engineer of the month'`
+						}
+					},
+					{
+						"type": "actions",
+						"elements": [
+							{
+								"type": "conversations_select",
+								"placeholder": {
+									"type": "plain_text",
+									"text": "Select a user",
+									"emoji": true
+								},
+								"action_id": "nomination-vote-action",
+								"filter": {
+									"include": [
+										"im"
+									],
+									"exclude_bot_users": true
+								}
+							}
+						]
+					}
+				]
+			});
+		}
+	}
+	catch (error) {
+		console.error(error);
+	}
+}
+
+function sendVoteConfiramtion(userId){
+
+	web.chat.postMessage({
+		channel: channelId,
+		user: userId,
+		blocks: [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "Thank you for your vote! :white_check_mark:"
+				}
+			}
+		]
+	});
+}
+
+function congratulateWinner(userId){
+
+	console.log("Congratulations userId", userId);
+
+	web.chat.postMessage({
+		channel: channelId,
+		user: userId,
+		blocks: [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "Thank you for your vote! :white_check_mark:"
+				}
+			}
+		]
 	});
 }
 
