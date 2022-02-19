@@ -512,7 +512,9 @@ async function actionsHandler(payload, respond) {
 					slack_account_id: payload.user.id
 				}));
 
-				//TODO: console.log("sync call");
+				var text = `Tokens have been successfully transferred <${nearConfig.walletUrl}|to your wallet!> :tada: `;
+				renderSlackBlock(respond, text);
+
 
 			} else {
 				renderSlackBlock(respond, `Ooops, nothing to withdraw yet! :confused:`);
