@@ -4,7 +4,6 @@ use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault, Balance, BorshStora
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
 
-
 pub type TokenAccountId = AccountId;
 pub type SlackAccountId = String;
 pub type Votes = u16;
@@ -33,6 +32,13 @@ pub struct Nomination {
     pub title: String,
     pub amount: Balance,
     pub is_valid: bool
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Winner {
+    pub winner: SlackAccountId,
+    pub amount: WrappedBalance
 }
 
 #[ext_contract(ext_self)]
@@ -172,7 +178,7 @@ impl Contract {
         self.nominations.insert(&owner, &nomination);
     }
 
-    pub fn finish_nomination(&mut self, owner: SlackAccountId) {
+    pub fn finish_nomination(&mut self, owner: SlackAccountId) -> Winner {
         self.assert_master_account();
         let nomination = self.nominations.get(&owner).unwrap_or_else(|| env::panic("Nomination not found".as_bytes()));
         let mut best_result = 0;
@@ -189,6 +195,12 @@ impl Contract {
         let user_rewards: Balance = self.rewards.get(&winner).unwrap_or(0);
         self.rewards.insert(&winner, &(nomination.amount + user_rewards));
         self.nominations.remove(&owner);
+
+        let winner = Winner{
+            winner: winner,
+            amount: nomination.amount.into()
+        };
+        winner
     }
 
     pub fn assert_master_account(&self) {
@@ -210,24 +222,18 @@ mod tests {
     use super::*;
     use near_sdk::test_utils::{VMContextBuilder, accounts};
     use near_sdk::{testing_env, MockedBlockchain};
-    use std::{println as info};
 
     fn setup_contract() -> (VMContextBuilder, Contract) {
         let mut context = VMContextBuilder::new();
         testing_env!(context.predecessor_account_id(accounts(0)).build());
-        let contract = Contract::new("sergey_shpota.testnet".to_string());
+        let contract = Contract::new("master_account.testnet".to_string());
         (context, contract)
     }
 
 
     #[test]
-    fn first() {
+    fn test() {
         let (_, mut contract) = setup_contract();
 
-        info!("Before {:?}\n", contract.get_nomination("test_nomination".to_string()));
-
-        // contract.add_vote("test_nomination".to_string(), "first_user".to_string());
-
-        // info!("After {:?}", contract.get_nomination("test_nomination".to_string()));
     }
 }
