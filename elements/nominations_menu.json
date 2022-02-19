@@ -23,6 +23,15 @@
         "type": "button",
         "text": {
           "type": "plain_text",
+          "text": "Back to menu",
+          "emoji": true
+        },
+        "action_id": "render-bot-menu"
+      },
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
           "text": "Help",
           "emoji": true
         },
