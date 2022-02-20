@@ -36,7 +36,7 @@ function listenForEvents(app) {
   });
 
 	slackEventAdapter.on("reaction_added", async (event) => {
-		if(event.reaction == "near_icon") {
+		if(event.reaction == "near_icon" || event.reaction == ":enthusiasm:")) {
 			reactionAddedHandler(event, userLoggedIn)
 		}
 	});
