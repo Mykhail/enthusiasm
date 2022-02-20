@@ -722,7 +722,7 @@ function sendConfiramtionMessage(userId, text, sendDMtoUser, balanceButton, with
 
 function congratulateWinner(finishResults){
 	web.chat.postMessage({
-		channel: channelId,
+		channel: finishResults.winner,
 		user: finishResults.winner,
 		blocks: [
 			{
