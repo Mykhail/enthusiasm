@@ -19,16 +19,6 @@
         },
         "value": "test",
         "action_id": "network-select-test"
-      },
-      {
-        "type": "button",
-        "text": {
-          "type": "plain_text",
-          "text": "Mainnet",
-          "emoji": true
-        },
-        "value": "main",
-        "action_id": "network-select-main"
       }
     ]
   }

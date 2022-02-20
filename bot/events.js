@@ -591,7 +591,7 @@ async function actionsHandler(payload, respond) {
 
 			break;
 
-		case 'network-select-main':
+		case 'network-select-test':
 			var text = `Please authorize Enthusiasm app in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId/${payload.user.id}|the following link>`;
 			renderSlackBlock(respond, text);
 
