@@ -6,6 +6,8 @@ const { WebClient } = require('@slack/web-api');
 const { createEventAdapter } = require('@slack/events-api');
 const { createMessageAdapter } = require('@slack/interactive-messages');
 const { utils } = require("near-api-js");
+const express = require('express');
+const router = express.Router();
 
 const web = new WebClient(token);
 const botOptions = require('../elements/botoptions.json');
@@ -29,6 +31,23 @@ let nomination = {};
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
 	app.use('/interactions', slackBotInteractions.requestListener());
+
+	app.use('/', router);
+
+	router.post('/enthusiasm', function(req,res) {
+		try {
+			let botMenu = isLoggedIn(req.user_id) ? botOptionsLoggedIn : botOptions;
+			const response = {
+				response_type: 'in_channel',
+				channel: req.channel_id,
+				blocks: botMenu
+			};
+			return res.json(response);
+		} catch (err) {
+			console.log(err);
+			return res.status(500).send('Something went wrong :(');
+		}
+	});
 
   slackEventAdapter.on('app_mention', (event) => {
     console.log(`Received an app_mention event from user ${event.user} in channel ${event.channel}`);
