@@ -430,7 +430,12 @@ function renderNominationMenu(title, userTable, nominationAmount, respond, isVal
 }
 
 async function actionsHandler(payload, respond) {
-	let actionId = payload.actions[0].action_id === 'near-bot-menu' ? payload.actions[0].selected_option.value : payload.actions[0].action_id;
+	let actionId;
+	if(payload.actions) {
+		actionId = payload.actions[0].action_id === 'near-bot-menu' ? payload.actions[0].selected_option.value : payload.actions[0].action_id;
+	} else {
+		actionId = payload.callback_id;
+	}
 
 	switch (actionId) {
 		case 'login':
@@ -622,6 +627,15 @@ async function actionsHandler(payload, respond) {
 		case	"nomination-help":
 			var text = `This functionality provides the ability to nominate any teammate for a reward at the end of a working period (sprint/month/year).\nNomination represents titles like "The most valuable player", "Soul of a Team" etc, and the number of the Near protocol tokens as a monetary reward.\nTeammates can vote for their nominees with the help of the Near blockchain, which makes this process completely easy and transparent. `;
 			renderSlackBlock(respond, text);
+			break;
+
+		case'enthusiasm-shortcut':
+			console.log("here", payload);
+			reactionAddedHandler({
+				user: payload.user.id,
+				item_user: payload.message.user,
+				item: {channel: payload.channel.id}
+			});
 			break;
 	}
 
