@@ -1,5 +1,4 @@
 const slackSigningSecret = process.env.SLACK_SIGNING_SECRET;
-const userLoggedIn = true;
 const token = process.env.SLACK_BOT_TOKEN;
 
 const { WebClient } = require('@slack/web-api');
@@ -28,6 +27,7 @@ const nearConfigFE = config.getFrontEndConfig(process.env.NEAR_ENV || 'testnet')
 let targetAccountId = '';
 let channelId = '';
 let nomination = {};
+let cacheUserLoggedIn = false;
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -60,7 +60,7 @@ function listenForEvents(app) {
 
 	slackEventAdapter.on("reaction_added", async (event) => {
 		if(event.reaction == "near_icon" || event.reaction == "enthusiasm") {
-			reactionAddedHandler(event, userLoggedIn)
+			reactionAddedHandler(event)
 		}
 	});
 
@@ -307,10 +307,17 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 });
 
 async function isLoggedIn(user) {
-	const result = await nearComms.callMethod('get_wallet', JSON.stringify({
-		slack_account_id: user
-	}));
-	return result.length > 0;
+	if (!cacheUserLoggedIn) {
+		const result = await nearComms.callMethod('get_wallet', JSON.stringify({
+			slack_account_id: user
+		}));
+
+		if(result.length > 0) {
+			cacheUserLoggedIn = true;
+		}
+	}
+
+	return cacheUserLoggedIn
 }
 
 async function getBalance(payload) {
