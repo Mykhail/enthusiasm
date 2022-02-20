@@ -10,7 +10,7 @@ Runs the app server to process slack requests.
 
 ### `npm run build:js`
 
-Builds client-side code which will run transactions confirmations and wallet communications on behalf of the user. Will use `./src` as source and put a built version in the `./dist` folder
+Builds client-side code which will handle transaction confirmations and wallet communications on behalf of the user. Will use `./src` as source and put a built version in the `./dist` folder
 
 ## Environment variables
 
