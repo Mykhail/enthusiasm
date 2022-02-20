@@ -35,7 +35,7 @@
           "text": "Help",
           "emoji": true
         },
-        "value": "nomination_help"
+        "action_id": "nomination-help"
       }
     ]
   },

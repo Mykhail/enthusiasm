@@ -55,8 +55,7 @@ function listenForEvents(app) {
 		let transactionHashes = req.query.transactions || req.query.transactionHashes;
 		let errorMessage = req.query.errorMessage;
 		if (transactionHashes) {
-
-			//sendVoteConfiramtion(req.params.ownerSlackId);
+			sendConfiramtionMessage(req.params.ownerSlackId, "Thank you for your vote! :white_check_mark:", true);
 
 			let payLoad = {
 				action: 'showTransactionConfirmation',
@@ -96,7 +95,8 @@ function listenForEvents(app) {
 					await nearComms.callMethod('create_nomination', JSON.stringify({
 						owner: ownerSlackId, title: nominationTitle
 					}), confirmedNearAmount);
-					sendVotingRequest();
+					sendConfiramtionMessage(req.params.ownerSlackId, "The nomination has been created! :white_check_mark:");
+					sendVotingRequest(nominationTitle);
 				} catch(e) {
 					console.log(e)
 				}
@@ -179,6 +179,9 @@ function listenForEvents(app) {
 					action: 'showTransactionConfirmation',
 					nearConfig: nearConfigFE
 				};
+
+				sendConfiramtionMessage(targetSlackId, `It seems your teammates really appreciate your work! :stuck_out_tongue_winking_eye: \n You have been rewarded with *${amount}* Near tokens!`, true, true, true, true);
+
 				let buffer = Buffer.from(JSON.stringify(payLoad), 'utf-8');
 				return res.render ('index', {locals: {
 					context: buffer.toString('base64') }
@@ -260,7 +263,7 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 		var userId = payload.user.id;
 		var nominationTitle = payload.view.state.values["nomination-new-name"].nomination_new_name.value;
 		var depositAmount = payload.view.state.values["nomination-new-amount"].nomination_amount.value;
-		var text = `In order to confirm nomination creation please <${nearConfig.endpoints.apiHost}/createNomination/${userId}/${nominationTitle}/${depositAmount}|follow the link>`;
+		var text = `:exclamation: In order to confirm nomination creation please <${nearConfig.endpoints.apiHost}/createNomination/${userId}/${nominationTitle}/${depositAmount}|follow the link>`;
 
 			web.chat.postEphemeral({
 				channel: channelId,
@@ -303,6 +306,20 @@ function renderSlackBlock(respond, text) {
 					"type": "mrkdwn",
 					"text": text
 				}
+			},
+			{
+				"type": "actions",
+				"elements": [
+					{
+						"type": "button",
+						"text": {
+							"type": "plain_text",
+							"text": "Back to menu",
+							"emoji": true
+						},
+						"action_id": "render-bot-menu"
+					}
+				]
 			}
 		]
 		,
@@ -495,6 +512,23 @@ async function actionsHandler(payload, respond) {
 						]
 					}
 				);
+			} else {
+				blocks.push(
+					{
+						"type": "actions",
+						"elements": [
+							{
+								"type": "button",
+								"text": {
+									"type": "plain_text",
+									"text": "Back to menu",
+									"emoji": true
+								},
+								"action_id": "render-bot-menu"
+							}
+						]
+					}
+				);
 			}
 
 			respond({
@@ -530,36 +564,46 @@ async function actionsHandler(payload, respond) {
 
 		case 'send-rewards':
 
-			var text = `In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/${targetAccountId}/${nearConfig.contractName}/${payload.actions[0].value}|follow the link>`;
+			var text = `:exclamation:In order to send tokens please <${nearConfig.endpoints.apiHost}/sendMoney/${targetAccountId}/${nearConfig.contractName}/${payload.actions[0].value}|follow the link>`;
 			renderSlackBlock(respond, text);
 
 			break;
 
 		case 'nomination-vote-action':
 
-			var text = `In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
+			var text = `:exclamation:In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
 			renderSlackBlock(respond, text);
 			break;
 
 		case 'nomination-finish':
-			await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
-			var text = `You have taken one more step to *bring more enthusiasm* to your team! Nomination has been succesfully fininshed! :tada: `;
-			renderSlackBlock(respond, text);
+			var finishResults = await nearComms.callMethod('finish_nomination', JSON.stringify({owner: payload.user.id}));
+			try {
+				finishResults = JSON.parse(finishResults);
+			} catch (e) {
+				finishResults = {};
+			}
 
-			//congratulateWinner();
+			var text = `Nomination *"${finishResults.nomination}"* has been succesfully fininshed! :tada:\nYou have taken one more step to *bring more enthusiasm* to your team!`;
+			renderSlackBlock(respond, text);
+			congratulateWinner(finishResults);
+
 
 			break;
 
 		case 'render-bot-menu':
 			renderBotMenu(respond);
+			break;
 
+		case	"nomination-help":
+			var text = `This functionality provides the ability to nominate any teammate for a reward at the end of a working period (sprint/month/year).\nNomination represents titles like "The most valuable player", "Soul of a Team" etc, and the number of the Near protocol tokens as a monetary reward.\nTeammates can vote for their nominees with the help of the Near blockchain, which makes this process completely easy and transparent. `;
+			renderSlackBlock(respond, text);
 			break;
 	}
 
 	return { text: 'Processing...' }
 }
 
-async function sendVotingRequest() {
+async function sendVotingRequest(nominationTitle) {
 	try {
 		var members = await web.conversations.members({
 			token: token,
@@ -577,7 +621,7 @@ async function sendVotingRequest() {
 						"type": "section",
 						"text": {
 							"type": "mrkdwn",
-							"text": `Dear <@${member}> Please vote for the nomination 'Engineer of the month'`
+							"text": `Dear <@${member}> Please vote for the nomination *"${nominationTitle}"*`
 						}
 					},
 					{
@@ -609,37 +653,106 @@ async function sendVotingRequest() {
 	}
 }
 
-function sendVoteConfiramtion(userId){
+function sendConfiramtionMessage(userId, text, sendDMtoUser, balanceButton, withdrawButton, menuButton){
+
+	var blocks = [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": text
+			}
+		}
+	];
+	var elements = [];
+
+	if (balanceButton) {
+		elements.push({
+			"type": "button",
+			"text": {
+				"type": "plain_text",
+				"text": "Balance",
+				"emoji": true
+			},
+			"style": "primary",
+			"action_id": "balance"
+		});
+	}
+
+	if (withdrawButton) {
+		elements.push({
+			"type": "button",
+			"text": {
+				"type": "plain_text",
+				"text": "Withdraw",
+				"emoji": true
+			},
+			"style": "primary",
+			"action_id": "withdraw"
+		});
+	}
+
+	if (menuButton) {
+		elements.push({
+			"type": "button",
+			"text": {
+				"type": "plain_text",
+				"text": "Go to menu",
+				"emoji": true
+			},
+			"action_id": "render-bot-menu"
+		});
+	}
+
+	if (balanceButton || withdrawButton || menuButton) {
+		blocks.push({
+			"type": "actions",
+			"elements": elements
+		});
+	}
 
 	web.chat.postMessage({
-		channel: channelId,
+		channel: sendDMtoUser ? userId : channelId,
 		user: userId,
-		blocks: [
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": "Thank you for your vote! :white_check_mark:"
-				}
-			}
-		]
+		blocks: blocks
 	});
 }
 
-function congratulateWinner(userId){
-
-	console.log("Congratulations userId", userId);
-
+function congratulateWinner(finishResults){
 	web.chat.postMessage({
 		channel: channelId,
-		user: userId,
+		user: finishResults.winner,
 		blocks: [
 			{
 				"type": "section",
 				"text": {
 					"type": "mrkdwn",
-					"text": "Thank you for your vote! :white_check_mark:"
+					"text": `Congratulations! You have won in the nominaton *"${finishResults.nomination}"*! :trophy:`
 				}
+			},
+			{
+				"type": "actions",
+				"elements": [
+					{
+						"type": "button",
+						"text": {
+							"type": "plain_text",
+							"text": "Withdraw",
+							"emoji": true
+						},
+						"style": "primary",
+						"action_id": "withdraw"
+					},
+					{
+						"type": "button",
+						"text": {
+							"type": "plain_text",
+							"text": "Back to menu",
+							"emoji": true
+						},
+						"action_id": "render-bot-menu"
+					}
+				]
 			}
 		]
 	});
