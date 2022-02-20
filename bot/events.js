@@ -701,7 +701,7 @@ async function sendVotingRequest(nominationTitle) {
 	}
 }
 
-function sendConfiramtionMessage(userId, text, sendDMtoUser, balanceButton, withdrawButton, menuButton){
+async function sendConfiramtionMessage(userId, text, sendDMtoUser, balanceButton, withdrawButton, menuButton){
 
 	var blocks = [
 		{
@@ -727,7 +727,7 @@ function sendConfiramtionMessage(userId, text, sendDMtoUser, balanceButton, with
 		});
 	}
 
-	if (withdrawButton) {
+	if (withdrawButton && await isLoggedIn(userId)) {
 		elements.push({
 			"type": "button",
 			"text": {
