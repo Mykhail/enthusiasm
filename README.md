@@ -1,73 +1,38 @@
-# near-slack-bot
+# Getting Started with ENTHUSIASM
 
+## Available Scripts
 
-redirector testing:
-    .env file example content:
-        NODE_ENV=development
-        SLACK_SIGNING_SECRET=12345
-        SLACK_BOT_TOKEN=54321
-        PORT=3000
-        APIHOST=http://localhost:3000
-        CONTRACT_NAME=sub.chokobear.testnet
-        PRIVATE_KEY=[your contract's private key from .near-credentials/contract.json. otherwise a file from user .near-credentials]
+In the project directory, you can run:
 
-    dev runtime initialization:
-        npm i
-        npm run build:js
-        npm run start
+### `npm run start`
 
-    wallet auth endpoint
-        http://localhost:3000/getAccountId/SLACKID
+Runs the app server to process slack requests.
 
-    send money endpoint
-        http://localhost:3000/sendMoney/SLACKID/targetNearAccountId/0.3
+### `npm run build:js`
 
+Builds client-side code which will handle transaction confirmations and wallet communications on behalf of the user. Will use `./src` as source and put a built version in the `./dist` folder
 
-    Vote for SLACKID endpoint
-        http://localhost:3000/voteForSlackId/OWNER_SLACKID/VOTED_FOR_SLACKID
+## Environment variables
 
-    Create nomination endpoint
-        http://localhost:3000/createNomination/OWNER_SLACKID/nominationTitle/depositNearAmount
+NODE\_ENV=`development`
 
+SLACK\_SIGNING\_SECRET=`SECRET`
 
-Smart contract deploy
+SLACK\_BOT\_TOKEN=`TOKEN`
 
-cd contract
-./reload_contract AccountId ParentAccountId
+PORT=`3000`
 
-Call contract via CLI
+APIHOST=`http://localhost:3000`
 
-near state contract.sbot.testnet
+CONTRACT\_NAME=`your contract name`
 
-near view contract.sbot.testnet get_wallet '{"slack_account_id": "test"}'
+PRIVATE\_KEY=`your contract's private key from .near-credentials/contract.json. otherwise a file from user .near-credentials will be used`
 
-near call contract.sbot.testnet associate_wallet_with_slack '{"slack_account_id": "test", "near_account_id": "recipient.testnet"}' --accountId sbot.testnet
+### Smart contract deployment
 
-near view contract.sbot.testnet get_rewards '{"slack_account_id":"test"}'
+### `cd contract`
 
-near call contract.sbot.testnet send_reward '{"slack_account_id": "test"}' --accountId sbot.testnet --deposit 1
+### `./reload_contract [AccountId] [ParentAccountId]`
 
-near call contract.sbot.testnet withdraw_rewards '{"slack_account_id": "test"}' --accountId sergey_shpota.testnet --gas=75000000000000
+Where AccountId is your target near account to host the contract. ParentAccountId is a parent account, see [https://docs.near.org/docs/concepts/account](<https://docs.near.org/docs/concepts/account>) for more details
 
-near generate-key
-
-near add-key sergey_shpota.testnet ed25519:4n9Kv6UnMfWx5syzgBPQyUz3dFM6WCQ4yNz4JLZWFAbe --contract-id contract.sbot.testnet --allowance 30000000000
-near add-key somix11.testnet ed25519:RTE93uLVJLAr8Kj1v5E5r3wib81WSbVydKpqj93c3nz --contract-id sub.somix11.testnet --allowance 30000000000
-
-
-near call sub.somix11.testnet create_nomination '{"owner":"U02TH9USH6H", "title":"Test nomination"}' --accountId somix11.testnet --deposit 1
-
-near view sub.somix11.testnet get_nomination '{"owner":"U02TH9USH6H"}'
-
-near call sub.somix11.testnet add_vote '{"owner":"test_owner", "vote":"second_user"}' --accountId somix11.testnet
-
-near call contract.sbot.testnet finish_nomination '{"owner":"test_owner"}' --accountId sergey_shpota.testnet --gas=75000000000000
-
-
-
-
-
-near call sub.somix11.testnet create_nomination '{"owner":"U02TH9USH6H", "title":"The MVP player of March"}' --accountId somix11.testnet --deposit 1
-near view sub.somix11.testnet get_nomination '{"owner":"U02TH9USH6H"}'
-near call sub.somix11.testnet add_vote '{"owner":"U02TH9USH6H", "vote":"U02TH9USH6H"}' --accountId somix11.testnet
-near call sub.somix11.testnet finish_nomination '{"owner":"U02TH9USH6H"}' --accountId somix11.testnet --gas=75000000000000
