@@ -20,9 +20,9 @@ SLACK\_SIGNING\_SECRET=`SECRET`
 
 SLACK\_BOT\_TOKEN=`TOKEN`
 
-PORT=3000
+PORT=`3000`
 
-APIHOST=http://localhost:3000
+APIHOST=`http://localhost:3000`
 
 CONTRACT\_NAME=`your contract name`
 
