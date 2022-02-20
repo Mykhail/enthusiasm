@@ -312,7 +312,8 @@ async function isLoggedIn(user) {
 			slack_account_id: user
 		}));
 
-		if(result.length > 0) {
+	console.log("result", result);
+	if(result.length > 0) {
 			cacheUserLoggedIn = true;
 		}
 	//}
