@@ -307,7 +307,7 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 });
 
 async function isLoggedIn(user) {
-	if (!cacheUserLoggedIn) {
+	//if (!cacheUserLoggedIn) {
 		const result = await nearComms.callMethod('get_wallet', JSON.stringify({
 			slack_account_id: user
 		}));
@@ -315,7 +315,7 @@ async function isLoggedIn(user) {
 		if(result.length > 0) {
 			cacheUserLoggedIn = true;
 		}
-	}
+	//}
 
 	return cacheUserLoggedIn
 }
