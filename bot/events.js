@@ -8,6 +8,7 @@ const { createMessageAdapter } = require('@slack/interactive-messages');
 const { utils } = require("near-api-js");
 const express = require('express');
 const router = express.Router();
+const bodyParser = require("body-parser");
 
 const web = new WebClient(token);
 const botOptions = require('../elements/botoptions.json');
@@ -32,14 +33,15 @@ function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
 	app.use('/interactions', slackBotInteractions.requestListener());
 
-	app.use('/', router);
+	app.use(bodyParser.urlencoded({ extended: false }));
+	app.use(bodyParser.json());
 
 	router.post('/enthusiasm', function(req,res) {
 		try {
-			let botMenu = isLoggedIn(req.user_id) ? botOptionsLoggedIn : botOptions;
+			let botMenu = isLoggedIn(req.body.user_id) ? botOptionsLoggedIn : botOptions;
 			const response = {
-				response_type: 'in_channel',
-				channel: req.channel_id,
+				response_type: 'ephemeral',
+				channel: req.body.channel_id,
 				blocks: botMenu
 			};
 			return res.json(response);
@@ -48,6 +50,8 @@ function listenForEvents(app) {
 			return res.status(500).send('Something went wrong :(');
 		}
 	});
+
+	app.use('/', router);
 
   slackEventAdapter.on('app_mention', (event) => {
     console.log(`Received an app_mention event from user ${event.user} in channel ${event.channel}`);
