@@ -22,7 +22,7 @@
         {
           "text": {
             "type": "plain_text",
-            "text": ":key:Login to the Near Wallet",
+            "text": ":key: Login to the Near Wallet",
             "emoji": true
           },
           "value": "login"

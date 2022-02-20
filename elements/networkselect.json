@@ -3,7 +3,7 @@
     "type": "section",
     "text": {
       "type": "plain_text",
-      "text": "Please select the network: :near_icon:",
+      "text": "Please select the network: :near_icon:\n ",
       "emoji": true
     }
   },
@@ -14,21 +14,21 @@
         "type": "button",
         "text": {
           "type": "plain_text",
-          "text": "Mainnet",
-          "emoji": true
-        },
-        "value": "main",
-        "action_id": "network-select-main"
-      },
-      {
-        "type": "button",
-        "text": {
-          "type": "plain_text",
           "text": "Testnet",
           "emoji": true
         },
         "value": "test",
         "action_id": "network-select-test"
+      },
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Mainnet",
+          "emoji": true
+        },
+        "value": "main",
+        "action_id": "network-select-main"
       }
     ]
   }

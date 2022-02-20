@@ -327,9 +327,11 @@ function renderSlackBlock(respond, text) {
 	});
 }
 
-function renderBotMenu(respond) {
+async function renderBotMenu(respond, userId) {
+	let botMenu = await isLoggedIn(userId) ? botOptionsLoggedIn : botOptions;
+
 	respond({
-		blocks: botOptionsLoggedIn,
+		blocks: botMenu,
 		replace_original: true
 	});
 }
@@ -557,7 +559,7 @@ async function actionsHandler(payload, respond) {
 			break;
 
 		case 'network-select-main':
-			var text = `Please authorize this bot in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId/${payload.user.id}|the following link>`;
+			var text = `Please authorize Enthusiasm app in your NEAR account by <${nearConfig.endpoints.apiHost}/getAccountId/${payload.user.id}|the following link>`;
 			renderSlackBlock(respond, text);
 
 			break;
@@ -591,7 +593,7 @@ async function actionsHandler(payload, respond) {
 			break;
 
 		case 'render-bot-menu':
-			renderBotMenu(respond);
+			renderBotMenu(respond,  payload.user.id);
 			break;
 
 		case	"nomination-help":
