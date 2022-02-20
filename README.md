@@ -32,7 +32,7 @@ PRIVATE\_KEY=`your contract's private key from .near-credentials/contract.json. 
 
 ### `cd contract`
 
-### `./reload\_contract [AccountId] [ParentAccountId]`
+### `./reload_contract [AccountId] [ParentAccountId]`
 
 Where AccountId is your target near account to host the contract. ParentAccountId is a parent account, see [https://docs.near.org/docs/concepts/account](<https://docs.near.org/docs/concepts/account>) for more details
 
