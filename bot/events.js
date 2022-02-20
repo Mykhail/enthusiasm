@@ -27,7 +27,6 @@ const nearConfigFE = config.getFrontEndConfig(process.env.NEAR_ENV || 'testnet')
 let targetAccountId = '';
 let channelId = '';
 let nomination = {};
-let cacheUserLoggedIn = false;
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -308,18 +307,11 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 });
 
 async function isLoggedIn(user) {
-	if (!cacheUserLoggedIn) {
 		const result = await nearComms.callMethod('get_wallet', JSON.stringify({
 			slack_account_id: user
 		}));
 
-	console.log("result", `*${result}*`);
-	if(result.length > 0) {
-			cacheUserLoggedIn = true;
-		}
-	}
-
-	return cacheUserLoggedIn
+	return result.length > 0
 }
 
 async function getBalance(payload) {
