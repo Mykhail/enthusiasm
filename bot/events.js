@@ -27,6 +27,7 @@ const nearConfigFE = config.getFrontEndConfig(process.env.NEAR_ENV || 'testnet')
 let targetAccountId = '';
 let channelId = '';
 let nomination = {};
+let nominationsMapping = {};
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -118,8 +119,11 @@ function listenForEvents(app) {
 					await nearComms.callMethod('create_nomination', JSON.stringify({
 						owner: ownerSlackId, title: nominationTitle
 					}), confirmedNearAmount);
+
+					nominationsMapping[nominationTitle] = ownerSlackId;
+
 					sendConfiramtionMessage(req.params.ownerSlackId, "The nomination has been created! :white_check_mark:");
-					sendVotingRequest(nominationTitle);
+					sendVotingRequest(ownerSlackId, nominationTitle);
 				} catch(e) {
 					console.log(e)
 				}
@@ -472,8 +476,8 @@ async function actionsHandler(payload, respond) {
 
 				//TODO: just to have nomination information for the finish block. to fix.
 				nomination = {
-					title: title
-
+					title: title,
+					owner: payload.user.id
 				};
 			}
 
@@ -601,8 +605,10 @@ async function actionsHandler(payload, respond) {
 			break;
 
 		case 'nomination-vote-action':
+console.log("payload", payload);
+console.log("nomination", nomination);
 
-			var text = `:exclamation:In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${payload.user.id}/${payload.actions[0].selected_conversation}|follow the link>`;
+			var text = `:exclamation:In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${nomination.owner}/${payload.actions[0].selected_conversation}|follow the link>`;
 			renderSlackBlock(respond, text);
 			break;
 
@@ -617,7 +623,7 @@ async function actionsHandler(payload, respond) {
 			var text = `Nomination *"${finishResults.nomination}"* has been succesfully fininshed! :tada:\nYou have taken one more step to *bring more enthusiasm* to your team!`;
 			renderSlackBlock(respond, text);
 			congratulateWinner(finishResults);
-
+			nomination = {};
 
 			break;
 
@@ -643,7 +649,7 @@ async function actionsHandler(payload, respond) {
 	return { text: 'Processing...' }
 }
 
-async function sendVotingRequest(nominationTitle) {
+async function sendVotingRequest(ownerSlackId, nominationTitle) {
 	try {
 		var members = await web.conversations.members({
 			token: token,
