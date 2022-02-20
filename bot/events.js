@@ -36,9 +36,10 @@ function listenForEvents(app) {
 	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(bodyParser.json());
 
-	router.post('/enthusiasm', function(req,res) {
+	router.post('/enthusiasm', async function(req,res) {
 		try {
-			let botMenu = isLoggedIn(req.body.user_id) ? botOptionsLoggedIn : botOptions;
+			console.log("req.body.user_id", req.body.user_id);
+			let botMenu = (await isLoggedIn(req.body.user_id)) ? botOptionsLoggedIn : botOptions;
 			const response = {
 				response_type: 'ephemeral',
 				channel: req.body.channel_id,
@@ -307,16 +308,16 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 });
 
 async function isLoggedIn(user) {
-	//if (!cacheUserLoggedIn) {
+	if (!cacheUserLoggedIn) {
 		const result = await nearComms.callMethod('get_wallet', JSON.stringify({
 			slack_account_id: user
 		}));
 
-	console.log("result", result);
+	console.log("result", `*${result}*`);
 	if(result.length > 0) {
 			cacheUserLoggedIn = true;
 		}
-	//}
+	}
 
 	return cacheUserLoggedIn
 }
