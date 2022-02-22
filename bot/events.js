@@ -606,9 +606,6 @@ async function actionsHandler(payload, respond) {
 			break;
 
 		case 'nomination-vote-action':
-console.log("payload", payload);
-console.log("nomination", nomination);
-
 			var text = `:exclamation:In order to vote for this user please <${nearConfig.endpoints.apiHost}/voteForSlackId/${nomination.owner}/${payload.actions[0].selected_conversation}|follow the link>`;
 			renderSlackBlock(respond, text);
 			break;
@@ -628,7 +625,7 @@ console.log("nomination", nomination);
 
 			break;
 
-		case 'render-bot-menu':l
+		case 'render-bot-menu':
 			renderBotMenu(respond,  payload.user.id);
 			break;
 
