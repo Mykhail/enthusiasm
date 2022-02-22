@@ -38,14 +38,15 @@ function listenForEvents(app) {
 
 	router.post('/enthusiasm', async function(req,res) {
 		try {
-			console.log("req.body.user_id", req.body.user_id);
+			res.send("");
+
 			let botMenu = (await isLoggedIn(req.body.user_id)) ? botOptionsLoggedIn : botOptions;
-			const response = {
-				response_type: 'ephemeral',
+
+			web.chat.postEphemeral({
 				channel: req.body.channel_id,
+				user: req.body.user_id,
 				blocks: botMenu
-			};
-			return res.json(response);
+			});
 		} catch (err) {
 			console.log(err);
 			return res.status(500).send('Something went wrong :(');
@@ -627,7 +628,7 @@ console.log("nomination", nomination);
 
 			break;
 
-		case 'render-bot-menu':
+		case 'render-bot-menu':l
 			renderBotMenu(respond,  payload.user.id);
 			break;
 
