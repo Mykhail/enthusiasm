@@ -28,6 +28,7 @@ let targetAccountId = '';
 let channelId = '';
 let nomination = {};
 let nominationsMapping = {};
+let loggedInUsers = {};
 
 function listenForEvents(app) {
   app.use('/events', slackEventAdapter.requestListener());
@@ -312,11 +313,17 @@ slackBotInteractions.viewSubmission('nomination_modal_submission', async (payloa
 });
 
 async function isLoggedIn(user) {
+	if(!loggedInUsers[user]){
 		const result = await nearComms.callMethod('get_wallet', JSON.stringify({
 			slack_account_id: user
 		}));
 
-	return result.length > 0
+		if(result > 0) {
+			loggedInUsers[user] = true;
+		}
+	}
+
+	return loggedInUsers[user];
 }
 
 async function getBalance(payload) {
